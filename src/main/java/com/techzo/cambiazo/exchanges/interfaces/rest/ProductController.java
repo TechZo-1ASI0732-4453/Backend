@@ -1,0 +1,135 @@
+package com.techzo.cambiazo.exchanges.interfaces.rest;
+
+
+import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllProductsByProductCategoryIdQuery;
+import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllProductsByUserIdQuery;
+import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllProductsQuery;
+import com.techzo.cambiazo.exchanges.domain.model.queries.GetProductByIdQuery;
+import com.techzo.cambiazo.exchanges.domain.services.IProductCommandService;
+import com.techzo.cambiazo.exchanges.domain.services.IProductQueryService;
+import com.techzo.cambiazo.exchanges.interfaces.rest.resources.CreateProductResource;
+import com.techzo.cambiazo.exchanges.interfaces.rest.resources.ProductResource;
+import com.techzo.cambiazo.exchanges.interfaces.rest.resources.UpdateProductResource;
+import com.techzo.cambiazo.exchanges.interfaces.rest.transform.CreateProductCommandFromResourceAssembler;
+import com.techzo.cambiazo.exchanges.interfaces.rest.transform.ProductResourceFromEntityAssembler;
+import com.techzo.cambiazo.exchanges.interfaces.rest.transform.UpdateProductCommandFromResourceAssembler;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+import static org.springframework.http.HttpStatus.CREATED;
+
+@RestController
+@RequestMapping("api/v2/products")
+@Tag(name = "Products", description = "Products Management Endpoints")
+public class ProductController {
+
+    private final IProductCommandService productCommandService;
+
+    private final IProductQueryService productQueryService;
+
+    public ProductController(IProductCommandService productCommandService, IProductQueryService productQueryService) {
+        this.productCommandService = productCommandService;
+        this.productQueryService = productQueryService;
+    }
+
+
+    @Operation(summary = "Create a new Product", description = "Create a new Product with the input data.")
+    @PostMapping
+    public ResponseEntity<ProductResource>createProduct(@RequestBody CreateProductResource resource) {
+        try{
+            var createProductCommand= CreateProductCommandFromResourceAssembler.toCommandFromResource(resource);
+            var product= productCommandService.handle(createProductCommand);
+            var productResource= ProductResourceFromEntityAssembler.toResourceFromEntity(product.get());
+            return ResponseEntity.status(CREATED).body(productResource);
+        }catch (IllegalArgumentException e){
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductResource>getProductById(@PathVariable Long id){
+        try{
+            var getProductByIdQuery = new GetProductByIdQuery(id);
+            var product = productQueryService.handle(getProductByIdQuery);
+            var productResource = ProductResourceFromEntityAssembler.toResourceFromEntity(product.get());
+            return ResponseEntity.ok(productResource);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/user/{id}")
+    public ResponseEntity<List<ProductResource>> getAllProductsByUserId(@PathVariable Long id){
+        try{
+            var getAllProductsByUserIdQuery = new GetAllProductsByUserIdQuery(id);
+            var products = productQueryService.handle(getAllProductsByUserIdQuery);
+            var productResource = products.stream()
+                    .map(ProductResourceFromEntityAssembler::toResourceFromEntity)
+                    .toList();
+            return ResponseEntity.ok(productResource);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/product-category/{id}")
+    public ResponseEntity<List<ProductResource>> getAllProductsByProductCategoryId(@PathVariable Long id){
+        try{
+            var getAllProductsByProductCategoryIdQuery = new GetAllProductsByProductCategoryIdQuery(id);
+            var products = productQueryService.handle(getAllProductsByProductCategoryIdQuery);
+            var productResource = products.stream()
+                    .map(ProductResourceFromEntityAssembler::toResourceFromEntity)
+                    .toList();
+            return ResponseEntity.ok(productResource);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ProductResource>> getAllProducts(){
+        try{
+            var getAllProductsQuery = new GetAllProductsQuery();
+            var products = productQueryService.handle(getAllProductsQuery);
+            var productResource = products.stream()
+                    .map(ProductResourceFromEntityAssembler::toResourceFromEntity)
+                    .toList();
+            return ResponseEntity.ok(productResource);
+        }catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+
+    @Operation(summary = "Update a Product", description = "Update a Product with the input data.")
+    @PutMapping("/edit/{productId}")
+    public ResponseEntity<ProductResource> updateProduct(@PathVariable Long productId, @RequestBody UpdateProductResource resource) {
+        try {
+            var updateProductCommand = UpdateProductCommandFromResourceAssembler.toCommandFromResource(productId, resource);
+            var product = productCommandService.handle(updateProductCommand);
+            var productResource = ProductResourceFromEntityAssembler.toResourceFromEntity(product.get());
+            return ResponseEntity.ok(productResource);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @Operation(summary = "Delete a Product", description = "Delete a Product with the input data.")
+    @DeleteMapping("/delete/{productId}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long productId) {
+        try {
+            productCommandService.handleDeleteProduct(productId);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+}
