@@ -1,0 +1,52 @@
+package com.techzo.cambiazo.exchanges.application.internal.commandservices;
+
+import com.techzo.cambiazo.exchanges.domain.model.commands.CreateFavoriteProductCommand;
+import com.techzo.cambiazo.exchanges.domain.model.entities.FavoriteProduct;
+import com.techzo.cambiazo.exchanges.domain.model.entities.Product;
+import com.techzo.cambiazo.exchanges.domain.model.entities.User;
+import com.techzo.cambiazo.exchanges.domain.services.IFavoriteProductCommandService;
+import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IFavoriteProductRepository;
+import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IProductRepository;
+import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IUserRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+public class FavoriteProductCommandServiceImpl implements IFavoriteProductCommandService {
+
+    private final IFavoriteProductRepository favoriteProductRepository;
+
+    private final IUserRepository userRepository;
+
+    private final IProductRepository productRepository;
+
+    public FavoriteProductCommandServiceImpl(IFavoriteProductRepository favoriteProductRepository, IUserRepository userRepository, IProductRepository productRepository) {
+        this.favoriteProductRepository = favoriteProductRepository;
+        this.userRepository = userRepository;
+        this.productRepository = productRepository;
+    }
+
+    @Override
+    public Optional<FavoriteProduct>handle(CreateFavoriteProductCommand command) {
+        User user = userRepository.findById(command.userId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Product product = productRepository.findById(command.productId()).orElseThrow(()-> new IllegalArgumentException("Product not found"));
+
+        var favoriteProduct = new FavoriteProduct(command,product,user);
+        favoriteProductRepository.save(favoriteProduct);
+        return Optional.of(favoriteProduct);
+    }
+
+    @Override
+    public boolean handleDeleteFavoriteProduct(Long id) {
+        Optional<FavoriteProduct>favoriteProduct = favoriteProductRepository.findById(id);
+        if(favoriteProduct.isPresent()){
+            favoriteProductRepository.delete(favoriteProduct.get());
+            return true;
+        }else{
+            return false;
+        }
+    }
+}
