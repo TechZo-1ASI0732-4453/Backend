@@ -1,7 +1,6 @@
 package com.techzo.cambiazo.exchanges.application.internal.queryservices;
 
 import com.techzo.cambiazo.exchanges.domain.model.entities.Exchange;
-import com.techzo.cambiazo.exchanges.domain.model.entities.User;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllExchangesByUserChangeIdQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllExchangesByUserOwnIdQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllExchangesQuery;
@@ -9,7 +8,8 @@ import com.techzo.cambiazo.exchanges.domain.model.queries.GetExchangeByIdQuery;
 import com.techzo.cambiazo.exchanges.domain.services.IExchangeQueryService;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IExchangeRepository;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IProductRepository;
-import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IUserRepository;
+import com.techzo.cambiazo.iam.domain.model.aggregates.User;
+import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,9 +21,9 @@ public class ExchangeQueryServiceImpl implements IExchangeQueryService {
     private final IExchangeRepository exchangeRepository;
 
     private final IProductRepository productRepository;
-    private final IUserRepository userRepository;
+    private final UserRepository userRepository;
 
-    public ExchangeQueryServiceImpl(IExchangeRepository exchangeRepository, IUserRepository userRepository, IProductRepository productRepository) {
+    public ExchangeQueryServiceImpl(IExchangeRepository exchangeRepository, UserRepository userRepository, IProductRepository productRepository) {
         this.exchangeRepository = exchangeRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;

@@ -6,12 +6,12 @@ import com.techzo.cambiazo.exchanges.domain.model.commands.UpdateProductCommand;
 import com.techzo.cambiazo.exchanges.domain.model.entities.District;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Product;
 import com.techzo.cambiazo.exchanges.domain.model.entities.ProductCategory;
-import com.techzo.cambiazo.exchanges.domain.model.entities.User;
 import com.techzo.cambiazo.exchanges.domain.services.IProductCommandService;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IDistrictRepository;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IProductCategoryRepository;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IProductRepository;
-import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IUserRepository;
+import com.techzo.cambiazo.iam.domain.model.aggregates.User;
+import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -21,13 +21,13 @@ public class ProductCommandServiceImpl implements IProductCommandService {
 
     private final IProductRepository productRepository;
 
-    private final IUserRepository userRepository;
+    private final UserRepository userRepository;
 
     private final IProductCategoryRepository productCategoryRepository;
 
     private final IDistrictRepository districtRepository;
 
-    public ProductCommandServiceImpl(IProductRepository productRepository, IUserRepository userRepository, IProductCategoryRepository productCategoryRepository, IDistrictRepository districtRepository) {
+    public ProductCommandServiceImpl(IProductRepository productRepository, UserRepository userRepository, IProductCategoryRepository productCategoryRepository, IDistrictRepository districtRepository) {
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.productCategoryRepository = productCategoryRepository;
