@@ -4,11 +4,11 @@ import com.techzo.cambiazo.exchanges.domain.model.commands.CreateSubscriptionCom
 import com.techzo.cambiazo.exchanges.domain.model.commands.UpdateSubscriptionCommand;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Plan;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Subscription;
-import com.techzo.cambiazo.exchanges.domain.model.entities.User;
 import com.techzo.cambiazo.exchanges.domain.services.ISubscriptionCommandService;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IPlanRepository;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.ISubscriptionRepository;
-import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IUserRepository;
+import com.techzo.cambiazo.iam.domain.model.aggregates.User;
+import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,9 +21,9 @@ public class SubscriptionCommandServiceImpl implements ISubscriptionCommandServi
     private final ISubscriptionRepository subscriptionRepository;
     private final IPlanRepository planRepository;
 
-    private final IUserRepository userRepository;
+    private final UserRepository userRepository;
 
-    public SubscriptionCommandServiceImpl(ISubscriptionRepository subscriptionRepository, IPlanRepository planRepository, IUserRepository userRepository) {
+    public SubscriptionCommandServiceImpl(ISubscriptionRepository subscriptionRepository, IPlanRepository planRepository, UserRepository userRepository) {
         this.subscriptionRepository = subscriptionRepository;
         this.planRepository = planRepository;
         this.userRepository = userRepository;

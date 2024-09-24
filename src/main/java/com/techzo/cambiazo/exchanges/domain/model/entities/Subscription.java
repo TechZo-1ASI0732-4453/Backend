@@ -2,6 +2,7 @@ package com.techzo.cambiazo.exchanges.domain.model.entities;
 
 
 import com.techzo.cambiazo.exchanges.domain.model.commands.CreateSubscriptionCommand;
+import com.techzo.cambiazo.iam.domain.model.aggregates.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

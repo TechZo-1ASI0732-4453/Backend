@@ -2,6 +2,7 @@ package com.techzo.cambiazo.exchanges.domain.model.entities;
 
 
 import com.techzo.cambiazo.exchanges.domain.model.commands.CreateProductCommand;
+import com.techzo.cambiazo.iam.domain.model.aggregates.User;
 import com.techzo.cambiazo.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

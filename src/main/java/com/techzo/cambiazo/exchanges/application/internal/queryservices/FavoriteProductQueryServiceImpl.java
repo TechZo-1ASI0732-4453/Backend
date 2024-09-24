@@ -1,11 +1,11 @@
 package com.techzo.cambiazo.exchanges.application.internal.queryservices;
 
 import com.techzo.cambiazo.exchanges.domain.model.entities.FavoriteProduct;
-import com.techzo.cambiazo.exchanges.domain.model.entities.User;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllFavoriteProductsByUserIdQuery;
 import com.techzo.cambiazo.exchanges.domain.services.IFavoriteProductQueryService;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IFavoriteProductRepository;
-import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IUserRepository;
+import com.techzo.cambiazo.iam.domain.model.aggregates.User;
+import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,9 +15,9 @@ public class FavoriteProductQueryServiceImpl implements IFavoriteProductQuerySer
 
     private final IFavoriteProductRepository favoriteProductRepository;
 
-    private final IUserRepository userRepository;
+    private final UserRepository userRepository;
 
-    public FavoriteProductQueryServiceImpl(IFavoriteProductRepository favoriteProductRepository, IUserRepository userRepository) {
+    public FavoriteProductQueryServiceImpl(IFavoriteProductRepository favoriteProductRepository, UserRepository userRepository) {
         this.favoriteProductRepository = favoriteProductRepository;
         this.userRepository = userRepository;
     }
