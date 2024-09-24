@@ -3,11 +3,11 @@ package com.techzo.cambiazo.exchanges.application.internal.commandservices;
 import com.techzo.cambiazo.exchanges.domain.model.commands.CreateFavoriteProductCommand;
 import com.techzo.cambiazo.exchanges.domain.model.entities.FavoriteProduct;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Product;
-import com.techzo.cambiazo.exchanges.domain.model.entities.User;
 import com.techzo.cambiazo.exchanges.domain.services.IFavoriteProductCommandService;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IFavoriteProductRepository;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IProductRepository;
-import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IUserRepository;
+import com.techzo.cambiazo.iam.domain.model.aggregates.User;
+import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -17,11 +17,11 @@ public class FavoriteProductCommandServiceImpl implements IFavoriteProductComman
 
     private final IFavoriteProductRepository favoriteProductRepository;
 
-    private final IUserRepository userRepository;
+    private final UserRepository userRepository;
 
     private final IProductRepository productRepository;
 
-    public FavoriteProductCommandServiceImpl(IFavoriteProductRepository favoriteProductRepository, IUserRepository userRepository, IProductRepository productRepository) {
+    public FavoriteProductCommandServiceImpl(IFavoriteProductRepository favoriteProductRepository, UserRepository userRepository, IProductRepository productRepository) {
         this.favoriteProductRepository = favoriteProductRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;

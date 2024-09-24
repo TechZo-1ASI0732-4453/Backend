@@ -1,13 +1,13 @@
 package com.techzo.cambiazo.exchanges.application.internal.queryservices;
 
 import com.techzo.cambiazo.exchanges.domain.model.entities.Subscription;
-import com.techzo.cambiazo.exchanges.domain.model.entities.User;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllSubscriptionsQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetSubscriptionByIdQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetSubscriptionByUserIdQuery;
 import com.techzo.cambiazo.exchanges.domain.services.ISubscriptionQueryService;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.ISubscriptionRepository;
-import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IUserRepository;
+import com.techzo.cambiazo.iam.domain.model.aggregates.User;
+import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,9 +19,9 @@ public class SubscriptionQueryServiceImpl implements ISubscriptionQueryService {
 
     private final ISubscriptionRepository subscriptionRepository;
 
-    private final IUserRepository userRepository;
+    private final UserRepository userRepository;
 
-    public SubscriptionQueryServiceImpl(ISubscriptionRepository subscriptionRepository, IUserRepository userRepository){
+    public SubscriptionQueryServiceImpl(ISubscriptionRepository subscriptionRepository, UserRepository userRepository){
         this.subscriptionRepository = subscriptionRepository;
         this.userRepository = userRepository;
     }
