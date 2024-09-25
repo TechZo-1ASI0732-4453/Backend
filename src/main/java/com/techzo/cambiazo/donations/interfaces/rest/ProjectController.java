@@ -27,7 +27,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
  * @version 1.0
  */
 @RestController
-@RequestMapping("/api/v1/projects")
+@RequestMapping("/api/v2/projects")
 @Tag(name="Projects", description="Projects Management Endpoints")
 public class ProjectController {
 

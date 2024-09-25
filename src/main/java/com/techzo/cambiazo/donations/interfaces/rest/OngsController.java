@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  * @version 1.0
  */
 @RestController
-@RequestMapping(value = "/api/v1/ongs", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/v2/ongs", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Ongs", description = "Ongs Management Endpoints")
 public class OngsController {
 
