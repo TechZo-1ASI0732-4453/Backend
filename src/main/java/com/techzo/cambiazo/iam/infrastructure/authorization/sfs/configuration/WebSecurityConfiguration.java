@@ -102,8 +102,10 @@ public class WebSecurityConfiguration {
                 .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(
-                                "/api/v1/authentication/sign-up", // Allow access to sign-up endpoint without authentication
-                                "/api/v1/authentication/**",
+                                "/api/v2/authentication/sign-up", // Allow access to sign-up endpoint without authentication
+                                "/api/v2/authentication/**",
+                                "/api/v2/products/**",
+                                "/api/v2/product-categories/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
