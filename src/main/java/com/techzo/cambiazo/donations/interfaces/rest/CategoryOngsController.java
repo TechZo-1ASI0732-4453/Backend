@@ -29,7 +29,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
  * @version 1.0
  */
 @RestController
-@RequestMapping("/api/v1/category-ongs")
+@RequestMapping("/api/v2/category-ongs")
 @Tag(name="CategoryOngs", description="CategoryOngs Management Endpoints")
 public class CategoryOngsController {
 

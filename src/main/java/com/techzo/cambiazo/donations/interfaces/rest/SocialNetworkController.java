@@ -27,7 +27,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
  * @version 1.0
  */
 @RestController
-@RequestMapping("/api/v1/social-networks")
+@RequestMapping("/api/v2/social-networks")
 @Tag(name="Social Networks", description="Social Networks Management Endpoints")
 public class SocialNetworkController {
 
