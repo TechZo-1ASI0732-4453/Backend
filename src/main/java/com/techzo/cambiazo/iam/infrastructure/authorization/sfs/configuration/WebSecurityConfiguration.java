@@ -104,8 +104,6 @@ public class WebSecurityConfiguration {
                         .requestMatchers(
                                 "/api/v2/authentication/sign-up", // Allow access to sign-up endpoint without authentication
                                 "/api/v2/authentication/**",
-                                "/api/v2/products/**",
-                                "/api/v2/product-categories/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
