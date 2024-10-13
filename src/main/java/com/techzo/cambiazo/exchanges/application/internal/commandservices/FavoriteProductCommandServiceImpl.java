@@ -34,7 +34,7 @@ public class FavoriteProductCommandServiceImpl implements IFavoriteProductComman
 
         Product product = productRepository.findById(command.productId()).orElseThrow(()-> new IllegalArgumentException("Product not found"));
 
-        var favoriteProduct = new FavoriteProduct(command,product,user);
+        var favoriteProduct = new FavoriteProduct(product,user);
         favoriteProductRepository.save(favoriteProduct);
         return Optional.of(favoriteProduct);
     }
