@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.iam.domain.model.aggregates;
 
+import com.techzo.cambiazo.iam.domain.model.commands.UpdateUserCommand;
 import com.techzo.cambiazo.iam.domain.model.entities.Role;
 import com.techzo.cambiazo.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.*;
@@ -42,6 +43,7 @@ public class User extends AuditableAbstractAggregateRoot<User> {
     @Size(max = 9)
     private String phoneNumber;
 
+    @Column(columnDefinition = "TEXT")
     private String profilePicture;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -66,6 +68,15 @@ public class User extends AuditableAbstractAggregateRoot<User> {
     public User(String username, String password, String name, String phoneNumber, String profilePicture, List<Role> roles) {
         this(username, password, name, phoneNumber, profilePicture);
         addRoles(roles);
+    }
+
+    public User updateInformation(String username, String password, String name, String phoneNumber, String profilePicture){
+        this.username=username;
+        this.password=password;
+        this.name=name;
+        this.phoneNumber=phoneNumber;
+        this.profilePicture=profilePicture;
+        return this;
     }
 
     /**
