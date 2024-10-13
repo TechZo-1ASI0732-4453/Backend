@@ -1,6 +1,6 @@
 package com.techzo.cambiazo.exchanges.domain.model.commands;
 
-public record CreateFavoriteProductCommand(Long userId, Long productId) {
+public record CreateFavoriteProductCommand(Long productId, Long userId) {
 
         public CreateFavoriteProductCommand {
             if (userId == null) {

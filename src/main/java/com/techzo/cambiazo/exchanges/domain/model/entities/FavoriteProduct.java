@@ -24,7 +24,7 @@ public class FavoriteProduct {
     public FavoriteProduct() {
     }
 
-    public FavoriteProduct(CreateFavoriteProductCommand command, Product product, User user) {
+    public FavoriteProduct(Product product, User user) {
         this.productId = product;
         this.userId = user;
     }

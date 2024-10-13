@@ -1,17 +1,18 @@
 package com.techzo.cambiazo.iam.interfaces.rest;
 
+import com.techzo.cambiazo.iam.domain.model.commands.UpdateUserCommand;
 import com.techzo.cambiazo.iam.domain.model.queries.GetAllUsersQuery;
 import com.techzo.cambiazo.iam.domain.model.queries.GetUserByIdQuery;
+import com.techzo.cambiazo.iam.domain.services.UserCommandService;
 import com.techzo.cambiazo.iam.domain.services.UserQueryService;
+import com.techzo.cambiazo.iam.interfaces.rest.resources.UpdateUserResource;
 import com.techzo.cambiazo.iam.interfaces.rest.resources.UserResource;
+import com.techzo.cambiazo.iam.interfaces.rest.transform.UpdateUserCommandFromResourceAssembler;
 import com.techzo.cambiazo.iam.interfaces.rest.transform.UserResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -27,9 +28,13 @@ import java.util.List;
 public class UsersController {
     private final UserQueryService userQueryService;
 
-    public UsersController(UserQueryService userQueryService) {
+    private final UserCommandService userCommandService;
+
+    public UsersController(UserQueryService userQueryService, UserCommandService userCommandService) {
         this.userQueryService = userQueryService;
+        this.userCommandService = userCommandService;
     }
+
 
     /**
      * This method returns all the users.
@@ -55,6 +60,17 @@ public class UsersController {
     public ResponseEntity<UserResource> getUserById(@PathVariable Long userId) {
         var getUserByIdQuery = new GetUserByIdQuery(userId);
         var user = userQueryService.handle(getUserByIdQuery);
+        if (user.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
+        return ResponseEntity.ok(userResource);
+    }
+
+    @PutMapping(value = "/edit/{userId}")
+    public ResponseEntity<UserResource>updateUser(@PathVariable Long userId, @RequestBody UpdateUserResource resource){
+        var updateUserCommand = UpdateUserCommandFromResourceAssembler.toCommandFromResource(userId,resource);
+        var user = userCommandService.handle(updateUserCommand);
         if (user.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
