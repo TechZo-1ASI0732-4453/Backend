@@ -1,9 +1,6 @@
 package com.techzo.cambiazo.exchanges.interfaces.rest;
 
-import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllExchangesByUserChangeIdQuery;
-import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllExchangesByUserOwnIdQuery;
-import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllExchangesQuery;
-import com.techzo.cambiazo.exchanges.domain.model.queries.GetExchangeByIdQuery;
+import com.techzo.cambiazo.exchanges.domain.model.queries.*;
 import com.techzo.cambiazo.exchanges.domain.services.IExchangeCommandService;
 import com.techzo.cambiazo.exchanges.domain.services.IExchangeQueryService;
 import com.techzo.cambiazo.exchanges.interfaces.rest.resources.CreateExchangeResource;
@@ -111,6 +108,20 @@ public class ExchangeController {
             var exchange = exchangeCommandService.handle(updateExchangeStatusCommand);
             var exchangeResource = ExchangeResourceFromEntityAssembler.toResourceFromEntity(exchange.get());
             return ResponseEntity.ok(exchangeResource);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/finished/{userId}")
+    public ResponseEntity<List<ExchangeResource>>getAllFinishedExchangesByUserId(@PathVariable Long userId) {
+        try {
+            var getAllFinishedExchangesByUserIdQuery = new GetAllFinishedExchangesByUserIdQuery(userId);
+            var exchanges = exchangeQueryService.handle(getAllFinishedExchangesByUserIdQuery);
+            var exchangeResources = exchanges.stream()
+                    .map(ExchangeResourceFromEntityAssembler::toResourceFromEntity)
+                    .toList();
+            return ResponseEntity.ok(exchangeResources);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
