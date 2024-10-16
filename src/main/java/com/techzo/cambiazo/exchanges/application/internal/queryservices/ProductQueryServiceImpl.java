@@ -2,7 +2,6 @@ package com.techzo.cambiazo.exchanges.application.internal.queryservices;
 
 import com.techzo.cambiazo.exchanges.domain.model.entities.Product;
 import com.techzo.cambiazo.exchanges.domain.model.entities.ProductCategory;
-import com.techzo.cambiazo.exchanges.domain.model.entities.User;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllProductsByProductCategoryIdQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllProductsByUserIdQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllProductsQuery;
@@ -10,7 +9,8 @@ import com.techzo.cambiazo.exchanges.domain.model.queries.GetProductByIdQuery;
 import com.techzo.cambiazo.exchanges.domain.services.IProductQueryService;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IProductCategoryRepository;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IProductRepository;
-import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IUserRepository;
+import com.techzo.cambiazo.iam.domain.model.aggregates.User;
+import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,11 +21,11 @@ public class ProductQueryServiceImpl implements IProductQueryService {
 
     private final IProductRepository productRepository;
 
-    private final IUserRepository userRepository;
+    private final UserRepository userRepository;
 
     private final IProductCategoryRepository productCategoryRepository;
 
-    public ProductQueryServiceImpl(IProductRepository productRepository, IUserRepository userRepository, IProductCategoryRepository productCategoryRepository){
+    public ProductQueryServiceImpl(IProductRepository productRepository, UserRepository userRepository, IProductCategoryRepository productCategoryRepository){
 
         this.productRepository=productRepository;
         this.productCategoryRepository = productCategoryRepository;
