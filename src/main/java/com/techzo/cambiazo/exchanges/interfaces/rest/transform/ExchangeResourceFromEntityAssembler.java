@@ -5,6 +5,6 @@ import com.techzo.cambiazo.exchanges.interfaces.rest.resources.ExchangeResource;
 
 public class ExchangeResourceFromEntityAssembler {
         public static ExchangeResource toResourceFromEntity(Exchange entity) {
-            return new ExchangeResource(entity.getId(), entity.getProductOwnId(), entity.getProductChangeId(), entity.getStatus());
+            return new ExchangeResource(entity.getId(), entity.getProductOwnId(), entity.getProductChangeId(), entity.getStatus(), entity.getExchangeDate(), entity.getCreatedAt(), entity.getUpdatedAt());
         }
 }
