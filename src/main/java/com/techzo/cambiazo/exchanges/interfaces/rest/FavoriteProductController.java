@@ -59,10 +59,10 @@ public class FavoriteProductController {
     }
 
     @Operation(summary="Delete a Favorite Product", description="Delete a Favorite Product with the input data.")
-    @DeleteMapping("/delete/{favoriteProductId}")
-    public ResponseEntity<Void> deleteFavoriteProduct(@PathVariable Long favoriteProductId) {
+    @DeleteMapping("/delete/{userId}/{favoriteProductId}")
+    public ResponseEntity<Void> deleteFavoriteProduct(@PathVariable Long userId, @PathVariable Long favoriteProductId) {
         try {
-            favoriteProductService.handleDeleteFavoriteProduct(favoriteProductId);
+            favoriteProductService.handleDeleteFavoriteProductByUserIdAndProductId(userId,favoriteProductId);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();

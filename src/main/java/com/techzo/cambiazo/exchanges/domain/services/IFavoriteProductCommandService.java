@@ -8,5 +8,5 @@ import java.util.Optional;
 public interface IFavoriteProductCommandService {
     Optional<FavoriteProduct> handle(CreateFavoriteProductCommand command);
 
-    boolean handleDeleteFavoriteProduct(Long id);
+    boolean handleDeleteFavoriteProductByUserIdAndProductId(Long userId, Long productId);
 }
