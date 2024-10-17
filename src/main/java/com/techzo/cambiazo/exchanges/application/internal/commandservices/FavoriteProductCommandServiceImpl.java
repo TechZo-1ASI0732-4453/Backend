@@ -40,8 +40,13 @@ public class FavoriteProductCommandServiceImpl implements IFavoriteProductComman
     }
 
     @Override
-    public boolean handleDeleteFavoriteProduct(Long id) {
-        Optional<FavoriteProduct>favoriteProduct = favoriteProductRepository.findById(id);
+    public boolean handleDeleteFavoriteProductByUserIdAndProductId(Long userId, Long productId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Product product = productRepository.findById(productId).orElseThrow(()-> new IllegalArgumentException("Product not found"));
+
+        Optional<FavoriteProduct>favoriteProduct = favoriteProductRepository.findFavoriteProductByUserIdAndProductId(user,product);
         if(favoriteProduct.isPresent()){
             favoriteProductRepository.delete(favoriteProduct.get());
             return true;
