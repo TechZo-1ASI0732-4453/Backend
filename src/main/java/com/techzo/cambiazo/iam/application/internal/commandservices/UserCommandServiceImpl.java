@@ -5,6 +5,7 @@ import com.techzo.cambiazo.iam.application.internal.outboundservices.tokens.Toke
 import com.techzo.cambiazo.iam.domain.model.aggregates.User;
 import com.techzo.cambiazo.iam.domain.model.commands.SignInCommand;
 import com.techzo.cambiazo.iam.domain.model.commands.SignUpCommand;
+import com.techzo.cambiazo.iam.domain.model.commands.UpdateProfileUserCommand;
 import com.techzo.cambiazo.iam.domain.model.commands.UpdateUserCommand;
 import com.techzo.cambiazo.iam.domain.services.UserCommandService;
 import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.RoleRepository;
@@ -90,4 +91,21 @@ public class UserCommandServiceImpl implements UserCommandService {
             throw new RuntimeException("Error while updating user: " + e.getMessage());
         }
     }
+
+    @Override
+    public Optional<User>handle(UpdateProfileUserCommand command){
+        var user = userRepository.findById(command.userId());
+        if (user.isEmpty())
+            throw new RuntimeException("User not found");
+
+        var userToUpdate = user.get();
+
+        try {
+            var updateUser = userRepository.save(userToUpdate.updateProfileInformation(command.name(), command.phoneNumber(), command.profilePicture()));
+            return Optional.of(updateUser);
+        }catch (Exception e){
+            throw new RuntimeException("Error while updating user: " + e.getMessage());
+        }
+    }
+
 }

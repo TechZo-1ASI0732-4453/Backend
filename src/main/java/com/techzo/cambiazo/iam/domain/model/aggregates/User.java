@@ -79,6 +79,13 @@ public class User extends AuditableAbstractAggregateRoot<User> {
         return this;
     }
 
+    public User updateProfileInformation(String name, String phoneNumber, String profilePicture){
+        this.name=name;
+        this.phoneNumber=phoneNumber;
+        this.profilePicture=profilePicture;
+        return this;
+    }
+
     /**
      * Add a role to the user
      * @param role the role to add
