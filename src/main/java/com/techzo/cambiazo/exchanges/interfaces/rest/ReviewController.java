@@ -1,9 +1,11 @@
 package com.techzo.cambiazo.exchanges.interfaces.rest;
 
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllReviewsByUserReceptorIdQuery;
+import com.techzo.cambiazo.exchanges.domain.model.queries.GetAverageRatingUserQuery;
 import com.techzo.cambiazo.exchanges.domain.services.IReviewCommandService;
 import com.techzo.cambiazo.exchanges.domain.services.IReviewQueryService;
 import com.techzo.cambiazo.exchanges.interfaces.rest.resources.CreateReviewResource;
+import com.techzo.cambiazo.exchanges.interfaces.rest.resources.ReviewAverageRatingResource;
 import com.techzo.cambiazo.exchanges.interfaces.rest.resources.ReviewResource;
 import com.techzo.cambiazo.exchanges.interfaces.rest.transform.CreateReviewCommandFromResourceAssembler;
 import com.techzo.cambiazo.exchanges.interfaces.rest.transform.ReviewResourceFromEntityAssembler;
@@ -63,6 +65,18 @@ public class ReviewController {
         try {
             reviewCommandService.handleDeleteReview(reviewId);
             return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/average-rating/{userId}")
+    public ResponseEntity<ReviewAverageRatingResource> getAverageRatingByUserReceptorId(@PathVariable Long userId) {
+        try {
+            var getAverageRatingUserQuery = new GetAverageRatingUserQuery(userId);
+            var averageRating = reviewQueryService.getAverageRatingByUserReceptorId(getAverageRatingUserQuery);
+            var reviewAverageRatingResource = new ReviewAverageRatingResource(averageRating);
+            return ResponseEntity.ok(reviewAverageRatingResource);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
