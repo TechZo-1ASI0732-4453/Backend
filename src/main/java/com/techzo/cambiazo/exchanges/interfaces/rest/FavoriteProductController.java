@@ -70,4 +70,13 @@ public class FavoriteProductController {
     }
 
 
+    @DeleteMapping("/delete/{favoriteProductId}")
+    public ResponseEntity<Void> deleteFavoriteProductById(@PathVariable Long favoriteProductId) {
+        try {
+            favoriteProductService.handleDeleteFavoriteProductById(favoriteProductId);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }
