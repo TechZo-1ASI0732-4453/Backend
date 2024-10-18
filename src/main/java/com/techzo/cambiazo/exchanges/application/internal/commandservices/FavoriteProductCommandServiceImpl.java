@@ -57,4 +57,14 @@ public class FavoriteProductCommandServiceImpl implements IFavoriteProductComman
             return false;
         }
     }
+
+    @Override
+    public boolean handleDeleteFavoriteProductById(Long id) {
+        if(favoriteProductRepository.existsFavoriteProductById(id)){
+            favoriteProductRepository.deleteById(id);
+            return true;
+        }else{
+            return false;
+        }
+    }
 }
