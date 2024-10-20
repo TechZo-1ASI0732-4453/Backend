@@ -53,6 +53,7 @@ public class ExchangeCommandServiceImpl implements IExchangeCommandService {
             var updatedExchange = exchangeRepository.save(exchangeToUpdate.updateInformation(productOwn, productChange, command.status()));
 
             if("Aceptado".equals(command.status())){
+                exchange.setExchangeDate(java.time.LocalDate.now());
                 productOwn.setAvailable(false);
                 productChange.setAvailable(false);
                 productRepository.save(productOwn);
