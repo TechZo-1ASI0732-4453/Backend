@@ -61,12 +61,12 @@ public class ExchangeQueryServiceImpl implements IExchangeQueryService {
 
         List<Exchange> exchangesOwn = this.exchangeRepository.findAllExchangesByProductOwnId_UserId(user)
                 .stream()
-                .filter(exchange -> "ACEPTADO".equals(exchange.getStatus()))
+                .filter(exchange -> "Aceptado".equals(exchange.getStatus()))
                 .collect(Collectors.toList());
 
         List<Exchange> exchangesChange = this.exchangeRepository.findAllExchangesByProductChangeId_UserId(user)
                 .stream()
-                .filter(exchange -> "ACEPTADO".equals(exchange.getStatus()))
+                .filter(exchange -> "Aceptado".equals(exchange.getStatus()))
                 .collect(Collectors.toList());
 
         // Swap productOwn and productChange for exchanges where the user is userChange
