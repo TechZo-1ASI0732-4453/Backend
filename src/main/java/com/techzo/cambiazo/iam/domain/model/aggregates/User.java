@@ -79,7 +79,8 @@ public class User extends AuditableAbstractAggregateRoot<User> {
         return this;
     }
 
-    public User updateProfileInformation(String name, String phoneNumber, String profilePicture){
+    public User updateProfileInformation(String username,String name, String phoneNumber, String profilePicture){
+        this.username=username;
         this.name=name;
         this.phoneNumber=phoneNumber;
         this.profilePicture=profilePicture;
