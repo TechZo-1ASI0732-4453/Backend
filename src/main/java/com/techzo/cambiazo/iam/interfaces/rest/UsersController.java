@@ -46,10 +46,10 @@ public class UsersController {
      * @see UserResource
      */
     @GetMapping
-    public ResponseEntity<List<UserResource>> getAllUsers() {
+    public ResponseEntity<List<UserResource2>> getAllUsers() {
         var getAllUsersQuery = new GetAllUsersQuery();
         var users = userQueryService.handle(getAllUsersQuery);
-        var userResources = users.stream().map(UserResourceFromEntityAssembler::toResourceFromEntity).toList();
+        var userResources = users.stream().map(UserResource2FromEntityAssembler::toResourceFromEntity).toList();
         return ResponseEntity.ok(userResources);
     }
 
