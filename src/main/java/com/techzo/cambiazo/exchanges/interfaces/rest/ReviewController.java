@@ -1,11 +1,11 @@
 package com.techzo.cambiazo.exchanges.interfaces.rest;
 
+import com.techzo.cambiazo.exchanges.domain.model.dtos.AverageAndCountReviewsDto;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllReviewsByUserReceptorIdQuery;
-import com.techzo.cambiazo.exchanges.domain.model.queries.GetAverageRatingUserQuery;
+import com.techzo.cambiazo.exchanges.domain.model.queries.GetAverageRatingAndCountReviewsUserQuery;
 import com.techzo.cambiazo.exchanges.domain.services.IReviewCommandService;
 import com.techzo.cambiazo.exchanges.domain.services.IReviewQueryService;
 import com.techzo.cambiazo.exchanges.interfaces.rest.resources.CreateReviewResource;
-import com.techzo.cambiazo.exchanges.interfaces.rest.resources.ReviewAverageRatingResource;
 import com.techzo.cambiazo.exchanges.interfaces.rest.resources.ReviewResource;
 import com.techzo.cambiazo.exchanges.interfaces.rest.transform.CreateReviewCommandFromResourceAssembler;
 import com.techzo.cambiazo.exchanges.interfaces.rest.transform.ReviewResourceFromEntityAssembler;
@@ -70,13 +70,12 @@ public class ReviewController {
         }
     }
 
-    @GetMapping("/average-rating/{userId}")
-    public ResponseEntity<ReviewAverageRatingResource> getAverageRatingByUserReceptorId(@PathVariable Long userId) {
+    @GetMapping("/average-count/{userId}")
+    public ResponseEntity<AverageAndCountReviewsDto> getAverageRatingByUserReceptorId(@PathVariable Long userId) {
         try {
-            var getAverageRatingUserQuery = new GetAverageRatingUserQuery(userId);
-            var averageRating = reviewQueryService.getAverageRatingByUserReceptorId(getAverageRatingUserQuery);
-            var reviewAverageRatingResource = new ReviewAverageRatingResource(averageRating);
-            return ResponseEntity.ok(reviewAverageRatingResource);
+            var getAverageRatingUserQuery = new GetAverageRatingAndCountReviewsUserQuery(userId);
+            var averageRatingAndCountReviews = reviewQueryService.getAverageRatingAndCountReviewsByUserReceptorId(getAverageRatingUserQuery);
+            return ResponseEntity.ok(averageRatingAndCountReviews);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
