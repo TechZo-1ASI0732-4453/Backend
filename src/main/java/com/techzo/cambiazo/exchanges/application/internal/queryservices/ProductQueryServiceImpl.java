@@ -86,7 +86,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
                 product.getImage(),
                 product.getBoost(),
                 product.getAvailable(),
-                userResource,
+                        product.getUserId(),
                 productCategory,
                 location
                 )
@@ -119,7 +119,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
                     product.getImage(),
                     product.getBoost(),
                     product.getAvailable(),
-                    userResource,
+                    product.getUserId(),
                     productCategory,
                     location
             );
@@ -151,7 +151,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
                     product.getImage(),
                     product.getBoost(),
                     product.getAvailable(),
-                    userResource,
+                    product.getUserId(),
                     productCategory,
                     location
             );
@@ -184,7 +184,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
                     product.getImage(),
                     product.getBoost(),
                     product.getAvailable(),
-                    userResource,
+                    product.getUserId(),
                     productCategory,
                     location
             );
