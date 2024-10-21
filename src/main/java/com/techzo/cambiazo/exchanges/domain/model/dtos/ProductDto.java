@@ -1,7 +1,7 @@
 package com.techzo.cambiazo.exchanges.domain.model.dtos;
 
 import com.techzo.cambiazo.exchanges.domain.model.entities.*;
-import com.techzo.cambiazo.iam.interfaces.rest.resources.UserResource2;
+import com.techzo.cambiazo.iam.domain.model.aggregates.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -16,7 +16,7 @@ public class ProductDto {
     private String image;
     private Boolean boost;
     private Boolean available;
-    private UserResource2 user;
+    private Long userId;
     private ProductCategory productCategory;
     private Location location;
 }
