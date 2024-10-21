@@ -11,6 +11,7 @@ import com.techzo.cambiazo.exchanges.domain.services.IProductQueryService;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.*;
 import com.techzo.cambiazo.iam.domain.model.aggregates.User;
 import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.UserRepository;
+import com.techzo.cambiazo.iam.interfaces.rest.transform.UserResource2FromEntityAssembler;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -72,6 +73,9 @@ public class ProductQueryServiceImpl implements IProductQueryService {
         ProductCategory productCategory = categories.stream().filter(c -> c.getId().equals(product.getProductCategoryId())).findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Product Category not found"));
         Location location = new Location(district.getId(),district.getName(), department.getId() ,department.getName(), country.getId(), country.getName());
+        User user = userRepository.findById(product.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        var userResource = UserResource2FromEntityAssembler.toResourceFromEntity(user);
         return Optional.of(
                 new ProductDto(
                         product.getId(),
@@ -82,7 +86,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
                 product.getImage(),
                 product.getBoost(),
                 product.getAvailable(),
-                product.getUserId(),
+                userResource,
                 productCategory,
                 location
                 )
@@ -92,6 +96,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
     @Override
     public List<ProductDto> handle(GetAllProductsQuery query) {
         List<Product>products = productRepository.findAll();
+        List<User>users = userRepository.findAll();
         return products.stream().map(product -> {
             District district = districts.stream().filter(d -> d.getId().equals(product.getDistrictId())).findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("District not found"));
@@ -102,6 +107,9 @@ public class ProductQueryServiceImpl implements IProductQueryService {
             ProductCategory productCategory = categories.stream().filter(c -> c.getId().equals(product.getProductCategoryId())).findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Product Category not found"));
             Location location = new Location(district.getId(),district.getName(), department.getId() ,department.getName(), country.getId(), country.getName());
+            User user = users.stream().filter(u -> u.getId().equals(product.getUserId())).findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            var userResource = UserResource2FromEntityAssembler.toResourceFromEntity(user);
             return new ProductDto(
                     product.getId(),
                     product.getName(),
@@ -111,7 +119,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
                     product.getImage(),
                     product.getBoost(),
                     product.getAvailable(),
-                    product.getUserId(),
+                    userResource,
                     productCategory,
                     location
             );
@@ -122,6 +130,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
     public List<ProductDto> handle(GetAllProductsByUserIdQuery query) {
         User user = userRepository.findById(query.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User with id "+query.userId()+" not found"));
+        var userResource = UserResource2FromEntityAssembler.toResourceFromEntity(user);
         List<Product> products = productRepository.findProductsByUserId(user);
         return products.stream().map(product -> {
             District district = districts.stream().filter(d -> d.getId().equals(product.getDistrictId())).findFirst()
@@ -142,7 +151,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
                     product.getImage(),
                     product.getBoost(),
                     product.getAvailable(),
-                    product.getUserId(),
+                    userResource,
                     productCategory,
                     location
             );
@@ -153,6 +162,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
     public List<ProductDto> handle(GetAllProductsByProductCategoryIdQuery query) {
         ProductCategory productCategory = productCategoryRepository.findById(query.productCategoryId())
                 .orElseThrow(()->new IllegalArgumentException("Product Category with id "+query.productCategoryId()+" not found"));
+        List<User>users = userRepository.findAll();
         List<Product> products = productRepository.findProductsByProductCategoryId(productCategory);
         return products.stream().map(product -> {
             District district = districts.stream().filter(d -> d.getId().equals(product.getDistrictId())).findFirst()
@@ -162,6 +172,9 @@ public class ProductQueryServiceImpl implements IProductQueryService {
             Country country = countries.stream().filter(c -> c.getId().equals(department.getCountryId())).findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Country not found"));
             Location location = new Location(district.getId(),district.getName(), department.getId() ,department.getName(), country.getId(), country.getName());
+            User user = users.stream().filter(u -> u.getId().equals(product.getUserId())).findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            var userResource = UserResource2FromEntityAssembler.toResourceFromEntity(user);
             return new ProductDto(
                     product.getId(),
                     product.getName(),
@@ -171,7 +184,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
                     product.getImage(),
                     product.getBoost(),
                     product.getAvailable(),
-                    product.getUserId(),
+                    userResource,
                     productCategory,
                     location
             );
