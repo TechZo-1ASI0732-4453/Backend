@@ -41,6 +41,7 @@ public class ReviewQueryServiceImpl implements IReviewQueryService {
             var userAuthorResource2 = UserResource2FromEntityAssembler.toResourceFromEntity(userAuthor);
             var userReceptorResource2 = UserResource2FromEntityAssembler.toResourceFromEntity(userReceptor);
             return new ReviewDto(
+                    review.getId(),
                     review.getMessage(),
                     review.getRating(),
                     review.getState(),
