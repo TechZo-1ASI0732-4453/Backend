@@ -1,8 +1,9 @@
 package com.techzo.cambiazo.exchanges.application.internal.queryservices;
 
+import com.techzo.cambiazo.exchanges.domain.model.dtos.AverageAndCountReviewsDto;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Review;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllReviewsByUserReceptorIdQuery;
-import com.techzo.cambiazo.exchanges.domain.model.queries.GetAverageRatingUserQuery;
+import com.techzo.cambiazo.exchanges.domain.model.queries.GetAverageRatingAndCountReviewsUserQuery;
 import com.techzo.cambiazo.exchanges.domain.services.IReviewQueryService;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IReviewRepository;
 import com.techzo.cambiazo.iam.domain.model.aggregates.User;
@@ -33,15 +34,16 @@ public class ReviewQueryServiceImpl implements IReviewQueryService {
 
 
     @Override
-    public Double getAverageRatingByUserReceptorId(GetAverageRatingUserQuery query) {
+    public AverageAndCountReviewsDto getAverageRatingAndCountReviewsByUserReceptorId(GetAverageRatingAndCountReviewsUserQuery query) {
         User user = this.userRepository.findById(query.userId())
                 .orElseThrow(()->new IllegalArgumentException("User not found"));
         List<Review> reviews = this.reviewRepository.findReviewsByUserReceptorId(user);
 
+
         if(reviews.isEmpty()){
-            return 0.0;
+            return new AverageAndCountReviewsDto(0.0,0L);
         }else {
-            return reviews.stream().mapToDouble(Review::getRating).average().getAsDouble();
+            return new AverageAndCountReviewsDto(reviews.stream().mapToDouble(Review::getRating).average().getAsDouble(),(long)reviews.size());
         }
     }
 

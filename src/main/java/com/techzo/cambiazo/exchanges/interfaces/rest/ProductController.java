@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.exchanges.interfaces.rest;
 
 
+import com.techzo.cambiazo.exchanges.domain.model.dtos.ProductDto;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllProductsByProductCategoryIdQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllProductsByUserIdQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllProductsQuery;
@@ -51,12 +52,11 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductResource>getProductById(@PathVariable Long id){
+    public ResponseEntity<ProductDto>getProductById(@PathVariable Long id){
         try{
             var getProductByIdQuery = new GetProductByIdQuery(id);
             var product = productQueryService.handle(getProductByIdQuery);
-            var productResource = ProductResourceFromEntityAssembler.toResourceFromEntity(product.get());
-            return ResponseEntity.ok(productResource);
+            return ResponseEntity.ok(product.get());
         }catch (Exception e){
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
@@ -64,14 +64,11 @@ public class ProductController {
     }
 
     @GetMapping("/user/{id}")
-    public ResponseEntity<List<ProductResource>> getAllProductsByUserId(@PathVariable Long id){
+    public ResponseEntity<List<ProductDto>> getAllProductsByUserId(@PathVariable Long id){
         try{
             var getAllProductsByUserIdQuery = new GetAllProductsByUserIdQuery(id);
             var products = productQueryService.handle(getAllProductsByUserIdQuery);
-            var productResource = products.stream()
-                    .map(ProductResourceFromEntityAssembler::toResourceFromEntity)
-                    .toList();
-            return ResponseEntity.ok(productResource);
+            return ResponseEntity.ok(products);
         }catch (Exception e){
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
@@ -79,14 +76,11 @@ public class ProductController {
     }
 
     @GetMapping("/product-category/{id}")
-    public ResponseEntity<List<ProductResource>> getAllProductsByProductCategoryId(@PathVariable Long id){
+    public ResponseEntity<List<ProductDto>> getAllProductsByProductCategoryId(@PathVariable Long id){
         try{
             var getAllProductsByProductCategoryIdQuery = new GetAllProductsByProductCategoryIdQuery(id);
             var products = productQueryService.handle(getAllProductsByProductCategoryIdQuery);
-            var productResource = products.stream()
-                    .map(ProductResourceFromEntityAssembler::toResourceFromEntity)
-                    .toList();
-            return ResponseEntity.ok(productResource);
+            return ResponseEntity.ok(products);
         }catch (Exception e){
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
@@ -94,14 +88,11 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductResource>> getAllProducts(){
+    public ResponseEntity<List<ProductDto>> getAllProducts(){
         try{
             var getAllProductsQuery = new GetAllProductsQuery();
             var products = productQueryService.handle(getAllProductsQuery);
-            var productResource = products.stream()
-                    .map(ProductResourceFromEntityAssembler::toResourceFromEntity)
-                    .toList();
-            return ResponseEntity.ok(productResource);
+            return ResponseEntity.ok(products);
         }catch (Exception e){
             e.printStackTrace();
             return ResponseEntity.badRequest().build();

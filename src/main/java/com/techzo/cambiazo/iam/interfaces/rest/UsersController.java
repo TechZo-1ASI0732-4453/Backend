@@ -8,8 +8,10 @@ import com.techzo.cambiazo.iam.domain.services.UserQueryService;
 import com.techzo.cambiazo.iam.interfaces.rest.resources.UpdateUserProfileResource;
 import com.techzo.cambiazo.iam.interfaces.rest.resources.UpdateUserResource;
 import com.techzo.cambiazo.iam.interfaces.rest.resources.UserResource;
+import com.techzo.cambiazo.iam.interfaces.rest.resources.UserResource2;
 import com.techzo.cambiazo.iam.interfaces.rest.transform.UpdateProfileUserCommandFromResourceAssembler;
 import com.techzo.cambiazo.iam.interfaces.rest.transform.UpdateUserCommandFromResourceAssembler;
+import com.techzo.cambiazo.iam.interfaces.rest.transform.UserResource2FromEntityAssembler;
 import com.techzo.cambiazo.iam.interfaces.rest.transform.UserResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
@@ -59,13 +61,13 @@ public class UsersController {
      * @see UserResource
      */
     @GetMapping(value = "/{userId}")
-    public ResponseEntity<UserResource> getUserById(@PathVariable Long userId) {
+    public ResponseEntity<UserResource2> getUserById(@PathVariable Long userId) {
         var getUserByIdQuery = new GetUserByIdQuery(userId);
         var user = userQueryService.handle(getUserByIdQuery);
         if (user.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
+        var userResource = UserResource2FromEntityAssembler.toResourceFromEntity(user.get());
         return ResponseEntity.ok(userResource);
     }
 
