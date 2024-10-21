@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.exchanges.domain.services;
 
+import com.techzo.cambiazo.exchanges.domain.model.dtos.ProductDto;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Product;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllProductsByProductCategoryIdQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllProductsByUserIdQuery;
@@ -11,11 +12,11 @@ import java.util.Optional;
 
 public interface IProductQueryService {
 
-    Optional<Product>handle(GetProductByIdQuery query);
+    Optional<ProductDto>handle(GetProductByIdQuery query);
 
-    List<Product>handle(GetAllProductsQuery query);
+    List<ProductDto>handle(GetAllProductsQuery query);
 
-    List<Product>handle(GetAllProductsByUserIdQuery query);
+    List<ProductDto>handle(GetAllProductsByUserIdQuery query);
 
-    List<Product>handle(GetAllProductsByProductCategoryIdQuery query);
+    List<ProductDto>handle(GetAllProductsByProductCategoryIdQuery query);
 }
