@@ -7,6 +7,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ProductDto {
+    private Long id;
     private String name;
     private String description;
     private String desiredObject;
@@ -14,7 +15,8 @@ public class ProductDto {
     private String image;
     private Boolean boost;
     private Boolean available;
-    private ProductCategory productCategoryId;
+    private Long userId;
+    private ProductCategory productCategory;
     private Location location;
 }
 

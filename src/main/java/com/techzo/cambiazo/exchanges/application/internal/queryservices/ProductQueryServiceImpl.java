@@ -74,6 +74,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
         Location location = new Location(district.getId(),district.getName(), department.getId() ,department.getName(), country.getId(), country.getName());
         return Optional.of(
                 new ProductDto(
+                        product.getId(),
                 product.getName(),
                 product.getDescription(),
                 product.getDesiredObject(),
@@ -81,6 +82,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
                 product.getImage(),
                 product.getBoost(),
                 product.getAvailable(),
+                product.getUserId(),
                 productCategory,
                 location
                 )
@@ -101,6 +103,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
                     .orElseThrow(() -> new IllegalArgumentException("Product Category not found"));
             Location location = new Location(district.getId(),district.getName(), department.getId() ,department.getName(), country.getId(), country.getName());
             return new ProductDto(
+                    product.getId(),
                     product.getName(),
                     product.getDescription(),
                     product.getDesiredObject(),
@@ -108,6 +111,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
                     product.getImage(),
                     product.getBoost(),
                     product.getAvailable(),
+                    product.getUserId(),
                     productCategory,
                     location
             );
@@ -130,6 +134,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
                     .orElseThrow(() -> new IllegalArgumentException("Product Category not found"));
             Location location = new Location(district.getId(),district.getName(), department.getId() ,department.getName(), country.getId(), country.getName());
             return new ProductDto(
+                    product.getId(),
                     product.getName(),
                     product.getDescription(),
                     product.getDesiredObject(),
@@ -137,6 +142,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
                     product.getImage(),
                     product.getBoost(),
                     product.getAvailable(),
+                    product.getUserId(),
                     productCategory,
                     location
             );
@@ -157,6 +163,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
                     .orElseThrow(() -> new IllegalArgumentException("Country not found"));
             Location location = new Location(district.getId(),district.getName(), department.getId() ,department.getName(), country.getId(), country.getName());
             return new ProductDto(
+                    product.getId(),
                     product.getName(),
                     product.getDescription(),
                     product.getDesiredObject(),
@@ -164,6 +171,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
                     product.getImage(),
                     product.getBoost(),
                     product.getAvailable(),
+                    product.getUserId(),
                     productCategory,
                     location
             );
