@@ -78,7 +78,7 @@ public class UserCommandServiceImpl implements UserCommandService {
 
     @Override
     public Optional<User>handle(UpdateUserCommand command){
-        var user = userRepository.findByUsername(command.username());
+        var user = userRepository.findById(command.userId());
         if (user.isEmpty())
             throw new RuntimeException("User not found");
 
@@ -93,7 +93,7 @@ public class UserCommandServiceImpl implements UserCommandService {
     }
 
     @Override
-    public Optional<User>handle(UpdateProfileUserCommand command){
+    public Optional<ImmutablePair<User, String>>handle(UpdateProfileUserCommand command){
         var user = userRepository.findById(command.userId());
         if (user.isEmpty())
             throw new RuntimeException("User not found");
@@ -102,7 +102,8 @@ public class UserCommandServiceImpl implements UserCommandService {
 
         try {
             var updateUser = userRepository.save(userToUpdate.updateProfileInformation(command.username(),command.name(), command.phoneNumber(), command.profilePicture()));
-            return Optional.of(updateUser);
+            var token = tokenService.generateToken(user.get().getUsername());
+            return Optional.of(ImmutablePair.of(user.get(), token));
         }catch (Exception e){
             throw new RuntimeException("Error while updating user: " + e.getMessage());
         }

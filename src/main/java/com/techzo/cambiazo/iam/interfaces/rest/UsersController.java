@@ -1,18 +1,11 @@
 package com.techzo.cambiazo.iam.interfaces.rest;
 
-import com.techzo.cambiazo.iam.domain.model.commands.UpdateUserCommand;
 import com.techzo.cambiazo.iam.domain.model.queries.GetAllUsersQuery;
 import com.techzo.cambiazo.iam.domain.model.queries.GetUserByIdQuery;
 import com.techzo.cambiazo.iam.domain.services.UserCommandService;
 import com.techzo.cambiazo.iam.domain.services.UserQueryService;
-import com.techzo.cambiazo.iam.interfaces.rest.resources.UpdateUserProfileResource;
-import com.techzo.cambiazo.iam.interfaces.rest.resources.UpdateUserResource;
-import com.techzo.cambiazo.iam.interfaces.rest.resources.UserResource;
-import com.techzo.cambiazo.iam.interfaces.rest.resources.UserResource2;
-import com.techzo.cambiazo.iam.interfaces.rest.transform.UpdateProfileUserCommandFromResourceAssembler;
-import com.techzo.cambiazo.iam.interfaces.rest.transform.UpdateUserCommandFromResourceAssembler;
-import com.techzo.cambiazo.iam.interfaces.rest.transform.UserResource2FromEntityAssembler;
-import com.techzo.cambiazo.iam.interfaces.rest.transform.UserResourceFromEntityAssembler;
+import com.techzo.cambiazo.iam.interfaces.rest.resources.*;
+import com.techzo.cambiazo.iam.interfaces.rest.transform.*;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -83,13 +76,13 @@ public class UsersController {
     }
 
     @PutMapping(value = "/edit/profile/{userId}")
-    public ResponseEntity<UserResource>updateUserProfile(@PathVariable Long userId, @RequestBody UpdateUserProfileResource resource){
+    public ResponseEntity<AuthenticatedUserResource>updateUserProfile(@PathVariable Long userId, @RequestBody UpdateUserProfileResource resource){
         var updateUserProfileCommand = UpdateProfileUserCommandFromResourceAssembler.toCommandFromResource(userId,resource);
         var user = userCommandService.handle(updateUserProfileCommand);
         if (user.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
-        return ResponseEntity.ok(userResource);
+        var authenticatedUserResource = AuthenticatedUserResourceFromEntityAssembler.toResourceFromEntity(user.get().getLeft(), user.get().getRight());
+        return ResponseEntity.ok(authenticatedUserResource);
     }
 }

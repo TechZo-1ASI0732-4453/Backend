@@ -14,6 +14,6 @@ public interface UserCommandService {
     Optional<User> handle(SignUpCommand command);
     Optional<User>handle(UpdateUserCommand command);
 
-    Optional<User>handle(UpdateProfileUserCommand command);
+    Optional<ImmutablePair<User, String>>handle(UpdateProfileUserCommand command);
 
 }
