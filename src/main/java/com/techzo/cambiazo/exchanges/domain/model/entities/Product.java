@@ -46,6 +46,7 @@ public class Product extends AuditableAbstractAggregateRoot<Product> {
     @NotNull(message = "Available is required")
     private Boolean available;
 
+
     @ManyToOne
     @JoinColumn(name = "product_category_id", nullable = false)
     private ProductCategory productCategoryId;
