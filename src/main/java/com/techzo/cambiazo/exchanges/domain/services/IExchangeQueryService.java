@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.exchanges.domain.services;
 
+import com.techzo.cambiazo.exchanges.domain.model.dtos.ModifiedExchange;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Exchange;
 import com.techzo.cambiazo.exchanges.domain.model.queries.*;
 
@@ -16,5 +17,5 @@ public interface IExchangeQueryService {
 
     List<Exchange>handle(GetAllExchangesByUserChangeIdQuery query);
 
-    List<Exchange>handle(GetAllFinishedExchangesByUserIdQuery query);
+    List<ModifiedExchange>handle(GetAllFinishedExchangesByUserIdQuery query);
 }

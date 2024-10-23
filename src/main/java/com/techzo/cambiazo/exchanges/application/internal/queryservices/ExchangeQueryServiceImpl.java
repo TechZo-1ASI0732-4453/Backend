@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.exchanges.application.internal.queryservices;
 
+import com.techzo.cambiazo.exchanges.domain.model.dtos.ModifiedExchange;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Exchange;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Product;
 import com.techzo.cambiazo.exchanges.domain.model.queries.*;
@@ -10,6 +11,7 @@ import com.techzo.cambiazo.iam.domain.model.aggregates.User;
 import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -55,9 +57,11 @@ public class ExchangeQueryServiceImpl implements IExchangeQueryService {
     }
 
     @Override
-    public List<Exchange> handle(GetAllFinishedExchangesByUserIdQuery query) {
+    public List<ModifiedExchange> handle(GetAllFinishedExchangesByUserIdQuery query) {
         User user = this.userRepository.findById(query.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        List<ModifiedExchange>allFinishedExchanges=new ArrayList<>();
 
         List<Exchange> exchangesOwn = this.exchangeRepository.findAllExchangesByProductOwnId_UserId(user)
                 .stream()
@@ -69,24 +73,37 @@ public class ExchangeQueryServiceImpl implements IExchangeQueryService {
                 .filter(exchange -> "Aceptado".equals(exchange.getStatus()))
                 .collect(Collectors.toList());
 
+
+        List<ModifiedExchange> modifiedExchangesOwn = exchangesOwn.stream().map(exchange -> {
+            ModifiedExchange modifiedExchange = new ModifiedExchange(exchange);
+            return modifiedExchange;
+        }).collect(Collectors.toList());
+
+
         // Swap productOwn and productChange for exchanges where the user is userChange
-        List<Exchange> modifiedExchangesChange = exchangesChange.stream().map(exchange -> {
-            Exchange modifiedExchange = new Exchange();
+        List<ModifiedExchange> modifiedExchangesChange = exchangesChange.stream().map(exchange -> {
+            ModifiedExchange modifiedExchange = new ModifiedExchange();
             Product productChange = this.productRepository.findById(exchange.getProductChangeId())
                     .orElseThrow(() -> new IllegalArgumentException("Product not found"));
             Product productOwn = this.productRepository.findById(exchange.getProductOwnId())
                     .orElseThrow(() -> new IllegalArgumentException("Product not found"));
-            modifiedExchange.setProductOwnId(productChange);
-            modifiedExchange.setProductChangeId(productOwn);
+            modifiedExchange.setId(exchange.getId());
+            modifiedExchange.setProductOwnId(productChange.getId());
+            modifiedExchange.setProductChangeId(productOwn.getId());
             modifiedExchange.setStatus(exchange.getStatus());
             modifiedExchange.setExchangeDate(exchange.getExchangeDate());
+            modifiedExchange.setCreatedAt(exchange.getCreatedAt());
+            modifiedExchange.setUpdatedAt(exchange.getUpdatedAt());
             return modifiedExchange;
         }).collect(Collectors.toList());
 
+
         // Combine both lists
-        exchangesOwn.addAll(modifiedExchangesChange);
-        return exchangesOwn.stream()
-                .sorted(Comparator.comparing(Exchange::getExchangeDate))
+        allFinishedExchanges.addAll(modifiedExchangesOwn);
+        allFinishedExchanges.addAll(modifiedExchangesChange);
+
+        return allFinishedExchanges.stream()
+                .sorted(Comparator.comparing(ModifiedExchange::getExchangeDate))
                 .collect(Collectors.toList());
     }
 
