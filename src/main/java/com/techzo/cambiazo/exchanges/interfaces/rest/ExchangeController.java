@@ -46,54 +46,44 @@ public class ExchangeController {
     }
 
     @GetMapping("/{exchangeId}")
-    public ResponseEntity<ExchangeResource>getExchangeById(@PathVariable Long exchangeId) {
+    public ResponseEntity<ModifiedExchange>getExchangeById(@PathVariable Long exchangeId) {
         try {
             var getExchangeByIdQuery = new GetExchangeByIdQuery(exchangeId);
             var exchange = exchangeQueryService.handle(getExchangeByIdQuery);
-            var exchangeResource = ExchangeResourceFromEntityAssembler.toResourceFromEntity(exchange.get());
-            return ResponseEntity.ok(exchangeResource);
+            return ResponseEntity.ok(exchange.get());
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
     @GetMapping
-    public ResponseEntity<List<ExchangeResource>>getAllExchanges() {
+    public ResponseEntity<List<ModifiedExchange>>getAllExchanges() {
         try {
             var getAllExchangesQuery = new GetAllExchangesQuery();
             var exchanges = exchangeQueryService.handle(getAllExchangesQuery);
-            var exchangeResources = exchanges.stream()
-                    .map(ExchangeResourceFromEntityAssembler::toResourceFromEntity)
-                    .toList();
-            return ResponseEntity.ok(exchangeResources);
+            return ResponseEntity.ok(exchanges);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
     @GetMapping("/userOwn/{userId}")
-    public ResponseEntity<List<ExchangeResource>>getAllExchangesByUserOwnId(@PathVariable Long userId) {
+    public ResponseEntity<List<ModifiedExchange>>getAllExchangesByUserOwnId(@PathVariable Long userId) {
         try {
             var getAllExchangesByUserOwnIdQuery = new GetAllExchangesByUserOwnIdQuery(userId);
             var exchanges = exchangeQueryService.handle(getAllExchangesByUserOwnIdQuery);
-            var exchangeResources = exchanges.stream()
-                    .map(ExchangeResourceFromEntityAssembler::toResourceFromEntity)
-                    .toList();
-            return ResponseEntity.ok(exchangeResources);
+            return ResponseEntity.ok(exchanges);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
     @GetMapping("/userChange/{userId}")
-    public ResponseEntity<List<ExchangeResource>>getAllExchangesByUserChangeId(@PathVariable Long userId) {
+    public ResponseEntity<List<ModifiedExchange>>getAllExchangesByUserChangeId(@PathVariable Long userId) {
         try {
             var getAllExchangesByUserChangeIdQuery = new GetAllExchangesByUserChangeIdQuery(userId);
             var exchanges = exchangeQueryService.handle(getAllExchangesByUserChangeIdQuery);
-            var exchangeResources = exchanges.stream()
-                    .map(ExchangeResourceFromEntityAssembler::toResourceFromEntity)
-                    .toList();
-            return ResponseEntity.ok(exchangeResources);
+            return ResponseEntity.ok(exchanges);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
