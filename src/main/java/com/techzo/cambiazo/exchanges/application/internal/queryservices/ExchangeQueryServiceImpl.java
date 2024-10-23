@@ -9,13 +9,15 @@ import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IExchangeRep
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IProductRepository;
 import com.techzo.cambiazo.iam.domain.model.aggregates.User;
 import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.UserRepository;
+import com.techzo.cambiazo.iam.interfaces.rest.transform.UserResource2FromEntityAssembler;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.hibernate.query.sqm.tree.SqmNode.log;
 
 @Service
 public class ExchangeQueryServiceImpl implements IExchangeQueryService {
@@ -25,6 +27,7 @@ public class ExchangeQueryServiceImpl implements IExchangeQueryService {
     private final IProductRepository productRepository;
     private final UserRepository userRepository;
 
+
     public ExchangeQueryServiceImpl(IExchangeRepository exchangeRepository, UserRepository userRepository, IProductRepository productRepository) {
         this.exchangeRepository = exchangeRepository;
         this.userRepository = userRepository;
@@ -33,27 +36,133 @@ public class ExchangeQueryServiceImpl implements IExchangeQueryService {
 
 
     @Override
-    public Optional<Exchange> handle(GetExchangeByIdQuery query) {
-        return this.exchangeRepository.findById(query.id());
+    public Optional<ModifiedExchange> handle(GetExchangeByIdQuery query) {
+        Exchange exchange= this.exchangeRepository.findById(query.id())
+                .orElseThrow(() -> new IllegalArgumentException("Exchange not found"));
+        Product productOwn = this.productRepository.findById(exchange.getProductOwnId())
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        Product productChange = this.productRepository.findById(exchange.getProductChangeId())
+                .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+        User userOwn = this.userRepository.findById(productOwn.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        User userChange = this.userRepository.findById(productChange.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        var userOwnResource = UserResource2FromEntityAssembler.toResourceFromEntity(userOwn);
+        var userChangeResource = UserResource2FromEntityAssembler.toResourceFromEntity(userChange);
+
+        return Optional.of(
+                new ModifiedExchange(
+                        exchange,
+                        productOwn,
+                        productChange,
+                        userOwnResource,
+                        userChangeResource
+                )
+        );
     }
 
     @Override
-    public List<Exchange> handle(GetAllExchangesQuery query) {
-        return this.exchangeRepository.findAll();
+    public List<ModifiedExchange> handle(GetAllExchangesQuery query) {
+        List<User> users = this.userRepository.findAll();
+        List<Product> products = this.productRepository.findAll();
+        List<Exchange> exchanges = this.exchangeRepository.findAll();
+
+
+        return exchanges.stream().map(exchange -> {
+            Product productOwn = products.stream()
+                    .filter(product -> product.getId().equals(exchange.getProductOwnId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+            Product productChange = products.stream()
+                    .filter(product -> product.getId().equals(exchange.getProductChangeId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+            User userOwn = users.stream()
+                    .filter(user -> user.getId().equals(productOwn.getUserId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            User userChange = users.stream()
+                    .filter(user -> user.getId().equals(productChange.getUserId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+            var userOwnResource = UserResource2FromEntityAssembler.toResourceFromEntity(userOwn);
+            var userChangeResource = UserResource2FromEntityAssembler.toResourceFromEntity(userChange);
+
+            return new ModifiedExchange(
+                    exchange,
+                    productOwn,
+                    productChange,
+                    userOwnResource,
+                    userChangeResource
+            );
+        }).collect(Collectors.toList());
     }
 
     @Override
-    public List<Exchange> handle(GetAllExchangesByUserOwnIdQuery query) {
+    public List<ModifiedExchange> handle(GetAllExchangesByUserOwnIdQuery query) {
+        User userOwn = this.userRepository.findById(query.id())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        var userOwnResource = UserResource2FromEntityAssembler.toResourceFromEntity(userOwn);
+        
+        List<Product>products = this.productRepository.findAll();
+        List<Exchange>exchanges = this.exchangeRepository.findAllExchangesByProductOwnId_UserId(userOwn);
+
+        return exchanges.stream().map(exchange -> {
+            Product productOwn = products.stream()
+                    .filter(product -> product.getId().equals(exchange.getProductOwnId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+            Product productChange = products.stream()
+                    .filter(product -> product.getId().equals(exchange.getProductChangeId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+            User userChange = this.userRepository.findById(productChange.getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            
+            var userChangeResource = UserResource2FromEntityAssembler.toResourceFromEntity(userChange);
+            return new ModifiedExchange(
+                    exchange,
+                    productOwn,
+                    productChange,
+                    userOwnResource,
+                    userChangeResource
+            );
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<ModifiedExchange> handle(GetAllExchangesByUserChangeIdQuery query) {
         User user = this.userRepository.findById(query.id())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        return this.exchangeRepository.findAllExchangesByProductOwnId_UserId(user);
-    }
+        var userChangeResource = UserResource2FromEntityAssembler.toResourceFromEntity(user);
 
-    @Override
-    public List<Exchange> handle(GetAllExchangesByUserChangeIdQuery query) {
-        User user = this.userRepository.findById(query.id())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        return this.exchangeRepository.findAllExchangesByProductChangeId_UserId(user);
+        List<Product>products = this.productRepository.findAll();
+        List<Exchange>exchanges = this.exchangeRepository.findAllExchangesByProductChangeId_UserId(user);
+
+        return exchanges.stream().map(exchange -> {
+            Product productOwn = products.stream()
+                    .filter(product -> product.getId().equals(exchange.getProductOwnId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+            Product productChange = products.stream()
+                    .filter(product -> product.getId().equals(exchange.getProductChangeId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+            User userOwn = this.userRepository.findById(productOwn.getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            var userOwnResource = UserResource2FromEntityAssembler.toResourceFromEntity(userOwn);
+
+            return new ModifiedExchange(
+                    exchange,
+                    productOwn,
+                    productChange,
+                    userOwnResource,
+                    userChangeResource
+            );
+        }).collect(Collectors.toList());
     }
 
     @Override
@@ -61,48 +170,71 @@ public class ExchangeQueryServiceImpl implements IExchangeQueryService {
         User user = this.userRepository.findById(query.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        List<ModifiedExchange>allFinishedExchanges=new ArrayList<>();
+        var userOwnResource = UserResource2FromEntityAssembler.toResourceFromEntity(user);
+
+        List<Product>products=this.productRepository.findAll();
 
         List<Exchange> exchangesOwn = this.exchangeRepository.findAllExchangesByProductOwnId_UserId(user)
                 .stream()
                 .filter(exchange -> "Aceptado".equals(exchange.getStatus()))
-                .collect(Collectors.toList());
+                .toList();
 
         List<Exchange> exchangesChange = this.exchangeRepository.findAllExchangesByProductChangeId_UserId(user)
                 .stream()
                 .filter(exchange -> "Aceptado".equals(exchange.getStatus()))
-                .collect(Collectors.toList());
+                .toList();
 
 
         List<ModifiedExchange> modifiedExchangesOwn = exchangesOwn.stream().map(exchange -> {
-            ModifiedExchange modifiedExchange = new ModifiedExchange(exchange);
-            return modifiedExchange;
+            Product productOwn = products.stream()
+                    .filter(product -> product.getId().equals(exchange.getProductOwnId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+            Product productChange = products.stream()
+                    .filter(product -> product.getId().equals(exchange.getProductChangeId()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Product not found"));
+            User userChange = this.userRepository.findById(productChange.getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            var userChangeResource = UserResource2FromEntityAssembler.toResourceFromEntity(userChange);
+
+            return new ModifiedExchange(
+                    exchange,
+                    productOwn,
+                    productChange,
+                    userOwnResource,
+                    userChangeResource
+            );
         }).collect(Collectors.toList());
 
 
-        // Swap productOwn and productChange for exchanges where the user is userChange
-        List<ModifiedExchange> modifiedExchangesChange = exchangesChange.stream().map(exchange -> {
-            ModifiedExchange modifiedExchange = new ModifiedExchange();
-            Product productChange = this.productRepository.findById(exchange.getProductChangeId())
+        List<ModifiedExchange>modifiedExchangesChange=exchangesChange.stream().map(exchange -> {
+            Product productOwn = products.stream()
+                    .filter(product -> product.getId().equals(exchange.getProductOwnId()))
+                    .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Product not found"));
-            Product productOwn = this.productRepository.findById(exchange.getProductOwnId())
+            Product productChange = products.stream()
+                    .filter(product -> product.getId().equals(exchange.getProductChangeId()))
+                    .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Product not found"));
-            modifiedExchange.setId(exchange.getId());
-            modifiedExchange.setProductOwnId(productChange.getId());
-            modifiedExchange.setProductChangeId(productOwn.getId());
-            modifiedExchange.setStatus(exchange.getStatus());
-            modifiedExchange.setExchangeDate(exchange.getExchangeDate());
-            modifiedExchange.setCreatedAt(exchange.getCreatedAt());
-            modifiedExchange.setUpdatedAt(exchange.getUpdatedAt());
-            return modifiedExchange;
-        }).collect(Collectors.toList());
+            User userChange = this.userRepository.findById(productOwn.getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+            var userChangeResource = UserResource2FromEntityAssembler.toResourceFromEntity(userChange);
+
+            return new ModifiedExchange(
+                    exchange,
+                    productOwn,
+                    productChange,
+                    userChangeResource,
+                    userOwnResource
+            );
+        }).toList();
 
 
         // Combine both lists
-        allFinishedExchanges.addAll(modifiedExchangesOwn);
-        allFinishedExchanges.addAll(modifiedExchangesChange);
+        modifiedExchangesOwn.addAll(modifiedExchangesChange);
 
-        return allFinishedExchanges.stream()
+        return modifiedExchangesOwn.stream()
                 .sorted(Comparator.comparing(ModifiedExchange::getExchangeDate))
                 .collect(Collectors.toList());
     }

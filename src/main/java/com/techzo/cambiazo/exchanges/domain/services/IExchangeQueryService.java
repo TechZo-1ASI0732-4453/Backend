@@ -9,13 +9,13 @@ import java.util.Optional;
 
 public interface IExchangeQueryService {
 
-    Optional<Exchange>handle(GetExchangeByIdQuery query);
+    Optional<ModifiedExchange>handle(GetExchangeByIdQuery query);
 
-    List<Exchange>handle(GetAllExchangesQuery query);
+    List<ModifiedExchange>handle(GetAllExchangesQuery query);
 
-    List<Exchange>handle(GetAllExchangesByUserOwnIdQuery query);
+    List<ModifiedExchange>handle(GetAllExchangesByUserOwnIdQuery query);
 
-    List<Exchange>handle(GetAllExchangesByUserChangeIdQuery query);
+    List<ModifiedExchange>handle(GetAllExchangesByUserChangeIdQuery query);
 
     List<ModifiedExchange>handle(GetAllFinishedExchangesByUserIdQuery query);
 }

@@ -2,6 +2,7 @@ package com.techzo.cambiazo.exchanges.domain.model.dtos;
 
 import com.techzo.cambiazo.exchanges.domain.model.entities.Exchange;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Product;
+import com.techzo.cambiazo.iam.interfaces.rest.resources.UserResource2;
 import jakarta.persistence.Column;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -21,11 +22,10 @@ import java.util.Date;
 public class ModifiedExchange {
 
     private Long id;
-
-    private Long productOwnId;
-
-    private Long productChangeId;
-
+    private Product productOwn;
+    private Product productChange;
+    private UserResource2 userOwn;
+    private UserResource2 userChange;
     private String status;
     private LocalDate exchangeDate;
     private Date createdAt;
@@ -33,13 +33,16 @@ public class ModifiedExchange {
 
     public ModifiedExchange(){}
 
-    public ModifiedExchange(Exchange exchange) {
+
+    public ModifiedExchange(Exchange exchange, Product productOwn, Product productChange, UserResource2 userOwn, UserResource2 userChange) {
         this.id = exchange.getId();
-        this.exchangeDate = exchange.getExchangeDate();
-        this.productOwnId = exchange.getProductOwnId();
-        this.productChangeId = exchange.getProductChangeId();
+        this.productOwn = productOwn;
+        this.productChange = productChange;
         this.status = exchange.getStatus();
+        this.exchangeDate = exchange.getExchangeDate();
         this.createdAt = exchange.getCreatedAt();
         this.updatedAt = exchange.getUpdatedAt();
+        this.userOwn = userOwn;
+        this.userChange = userChange;
     }
 }
