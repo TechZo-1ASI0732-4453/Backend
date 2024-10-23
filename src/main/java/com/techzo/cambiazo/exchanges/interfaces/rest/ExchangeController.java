@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.exchanges.interfaces.rest;
 
+import com.techzo.cambiazo.exchanges.domain.model.dtos.ModifiedExchange;
 import com.techzo.cambiazo.exchanges.domain.model.queries.*;
 import com.techzo.cambiazo.exchanges.domain.services.IExchangeCommandService;
 import com.techzo.cambiazo.exchanges.domain.services.IExchangeQueryService;
@@ -114,14 +115,11 @@ public class ExchangeController {
     }
 
     @GetMapping("/finished/{userId}")
-    public ResponseEntity<List<ExchangeResource>>getAllFinishedExchangesByUserId(@PathVariable Long userId) {
+    public ResponseEntity<List<ModifiedExchange>>getAllFinishedExchangesByUserId(@PathVariable Long userId) {
         try {
             var getAllFinishedExchangesByUserIdQuery = new GetAllFinishedExchangesByUserIdQuery(userId);
             var exchanges = exchangeQueryService.handle(getAllFinishedExchangesByUserIdQuery);
-            var exchangeResources = exchanges.stream()
-                    .map(ExchangeResourceFromEntityAssembler::toResourceFromEntity)
-                    .toList();
-            return ResponseEntity.ok(exchangeResources);
+            return ResponseEntity.ok(exchanges);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
