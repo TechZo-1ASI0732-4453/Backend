@@ -22,14 +22,12 @@ public class ModifiedExchange {
 
     private Long id;
 
-    private LocalDate exchangeDate;
-
     private Long productOwnId;
 
     private Long productChangeId;
 
     private String status;
-
+    private LocalDate exchangeDate;
     private Date createdAt;
     private Date updatedAt;
 
