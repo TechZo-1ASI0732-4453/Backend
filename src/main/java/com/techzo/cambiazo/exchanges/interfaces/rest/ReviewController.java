@@ -1,7 +1,9 @@
 package com.techzo.cambiazo.exchanges.interfaces.rest;
 
 import com.techzo.cambiazo.exchanges.domain.model.dtos.AverageAndCountReviewsDto;
+import com.techzo.cambiazo.exchanges.domain.model.dtos.ExistReview;
 import com.techzo.cambiazo.exchanges.domain.model.dtos.ReviewDto;
+import com.techzo.cambiazo.exchanges.domain.model.queries.FindReviewByUserAuthorIdAndExchangeId;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllReviewsByUserReceptorIdQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAverageRatingAndCountReviewsUserQuery;
 import com.techzo.cambiazo.exchanges.domain.services.IReviewCommandService;
@@ -74,6 +76,17 @@ public class ReviewController {
             var getAverageRatingUserQuery = new GetAverageRatingAndCountReviewsUserQuery(userId);
             var averageRatingAndCountReviews = reviewQueryService.getAverageRatingAndCountReviewsByUserReceptorId(getAverageRatingUserQuery);
             return ResponseEntity.ok(averageRatingAndCountReviews);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/user-receptor/{userId}/exchange/{exchangeId}")
+    public ResponseEntity<ExistReview> existsByUserAuthorIdAndExchangeId(@PathVariable Long userId, @PathVariable Long exchangeId) {
+        try {
+            var findReviewByUserAuthorIdAndExchangeId = new FindReviewByUserAuthorIdAndExchangeId(userId, exchangeId);
+            var existsReview = reviewQueryService.existsByUserAuthorIdAndExchangeId(findReviewByUserAuthorIdAndExchangeId);
+            return ResponseEntity.ok(existsReview);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
