@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa;
 
+import com.techzo.cambiazo.exchanges.domain.model.entities.Exchange;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Review;
 import com.techzo.cambiazo.iam.domain.model.aggregates.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,4 +12,6 @@ import java.util.List;
 public interface IReviewRepository extends JpaRepository<Review, Long> {
 
     List<Review>findReviewsByUserReceptorId(User userReceptorId);
+
+    Review findReviewByUserAuthorIdAndExchangeId(User userAuthorId, Exchange exchangeId);
 }
