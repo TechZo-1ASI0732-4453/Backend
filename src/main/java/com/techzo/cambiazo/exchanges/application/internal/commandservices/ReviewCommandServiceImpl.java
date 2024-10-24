@@ -32,6 +32,10 @@ public class ReviewCommandServiceImpl implements IReviewCommandService {
         Exchange exchange = exchangeRepository.findById(command.exchangeId()).orElseThrow(() -> new IllegalArgumentException("Exchange not found"));
         User userAuthor = userRepository.findById(command.userAuthorId()).orElseThrow(() -> new IllegalArgumentException("User author not found"));
         User userReceptor = userRepository.findById(command.userReceptorId()).orElseThrow(() -> new IllegalArgumentException("User receptor not found"));
+        Review existsReview = reviewRepository.findReviewByUserAuthorIdAndExchangeId(userAuthor, exchange);
+        if(existsReview != null){
+            throw new IllegalArgumentException("Review already exists");
+        }
         var review = new Review(command, exchange, userAuthor, userReceptor);
         var createdReview = reviewRepository.save(review);
         return Optional.of(createdReview);

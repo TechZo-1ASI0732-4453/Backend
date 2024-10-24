@@ -1,11 +1,15 @@
 package com.techzo.cambiazo.exchanges.application.internal.queryservices;
 
 import com.techzo.cambiazo.exchanges.domain.model.dtos.AverageAndCountReviewsDto;
+import com.techzo.cambiazo.exchanges.domain.model.dtos.ExistReview;
 import com.techzo.cambiazo.exchanges.domain.model.dtos.ReviewDto;
+import com.techzo.cambiazo.exchanges.domain.model.entities.Exchange;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Review;
+import com.techzo.cambiazo.exchanges.domain.model.queries.FindReviewByUserAuthorIdAndExchangeId;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllReviewsByUserReceptorIdQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAverageRatingAndCountReviewsUserQuery;
 import com.techzo.cambiazo.exchanges.domain.services.IReviewQueryService;
+import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IExchangeRepository;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IReviewRepository;
 import com.techzo.cambiazo.iam.domain.model.aggregates.User;
 import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.UserRepository;
@@ -24,9 +28,12 @@ public class ReviewQueryServiceImpl implements IReviewQueryService {
 
     private final UserRepository userRepository;
 
-    public ReviewQueryServiceImpl(IReviewRepository reviewRepository, UserRepository userRepository) {
+    private final IExchangeRepository exchangeRepository;
+
+    public ReviewQueryServiceImpl(IReviewRepository reviewRepository, UserRepository userRepository, IExchangeRepository exchangeRepository) {
         this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
+        this.exchangeRepository = exchangeRepository;
     }
 
 
@@ -65,6 +72,17 @@ public class ReviewQueryServiceImpl implements IReviewQueryService {
         }else {
             return new AverageAndCountReviewsDto(reviews.stream().mapToDouble(Review::getRating).average().getAsDouble(),(long)reviews.size());
         }
+    }
+
+    @Override
+    public ExistReview existsByUserAuthorIdAndExchangeId(FindReviewByUserAuthorIdAndExchangeId query) {
+        User userAuthor = this.userRepository.findById(query.userAuthorId())
+                .orElseThrow(()->new IllegalArgumentException("User not found"));
+
+        Exchange exchange = this.exchangeRepository.findById(query.exchangeId())
+                .orElseThrow(()->new IllegalArgumentException("Exchange not found"));
+
+        return new ExistReview(this.reviewRepository.findReviewByUserAuthorIdAndExchangeId(userAuthor,exchange)!=null);
     }
 
 }
