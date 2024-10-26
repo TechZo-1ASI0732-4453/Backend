@@ -235,7 +235,7 @@ public class ExchangeQueryServiceImpl implements IExchangeQueryService {
         modifiedExchangesOwn.addAll(modifiedExchangesChange);
 
         return modifiedExchangesOwn.stream()
-                .sorted(Comparator.comparing(ModifiedExchange::getExchangeDate))
+                .sorted(Comparator.comparing(ModifiedExchange::getExchangeDate).reversed())
                 .collect(Collectors.toList());
     }
 
