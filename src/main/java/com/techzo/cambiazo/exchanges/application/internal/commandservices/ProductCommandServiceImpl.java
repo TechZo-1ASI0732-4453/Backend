@@ -4,16 +4,19 @@ package com.techzo.cambiazo.exchanges.application.internal.commandservices;
 import com.techzo.cambiazo.exchanges.domain.model.commands.CreateProductCommand;
 import com.techzo.cambiazo.exchanges.domain.model.commands.UpdateProductCommand;
 import com.techzo.cambiazo.exchanges.domain.model.entities.District;
+import com.techzo.cambiazo.exchanges.domain.model.entities.FavoriteProduct;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Product;
 import com.techzo.cambiazo.exchanges.domain.model.entities.ProductCategory;
 import com.techzo.cambiazo.exchanges.domain.services.IProductCommandService;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IDistrictRepository;
+import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IFavoriteProductRepository;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IProductCategoryRepository;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IProductRepository;
 import com.techzo.cambiazo.iam.domain.model.aggregates.User;
 import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -27,11 +30,14 @@ public class ProductCommandServiceImpl implements IProductCommandService {
 
     private final IDistrictRepository districtRepository;
 
-    public ProductCommandServiceImpl(IProductRepository productRepository, UserRepository userRepository, IProductCategoryRepository productCategoryRepository, IDistrictRepository districtRepository) {
+    private final IFavoriteProductRepository favoriteProductRepository;
+
+    public ProductCommandServiceImpl(IProductRepository productRepository, UserRepository userRepository, IProductCategoryRepository productCategoryRepository, IDistrictRepository districtRepository, IFavoriteProductRepository favoriteProductRepository) {
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.productCategoryRepository = productCategoryRepository;
         this.districtRepository = districtRepository;
+        this.favoriteProductRepository = favoriteProductRepository;
     }
 
     @Override
@@ -85,14 +91,15 @@ public class ProductCommandServiceImpl implements IProductCommandService {
     }
 
     @Override
-    public boolean handleDeleteProduct(Long id){
-        Optional<Product> product=productRepository.findById(id);
-        if(product.isPresent()){
-            productRepository.delete(product.get());
-            return true;
-        }else{
-            return false;
+    public boolean handleDeleteProduct(Long id) {
+        Optional<Product> product = productRepository.findById(id);
+        if (product.isEmpty()) {
+            throw new IllegalArgumentException("Product not found");
         }
-    }
+        List<FavoriteProduct> favoriteProducts = favoriteProductRepository.findFavoriteProductsByProductId(product.get());
 
+        favoriteProductRepository.deleteAll(favoriteProducts);
+        productRepository.delete(product.get());
+        return true;
+    }
 }

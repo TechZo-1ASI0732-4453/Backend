@@ -16,6 +16,8 @@ public interface IFavoriteProductRepository extends JpaRepository<FavoriteProduc
 
     Optional<FavoriteProduct>findFavoriteProductByUserIdAndProductId(User userId, Product productId);
 
+    List<FavoriteProduct>findFavoriteProductsByProductId(Product productId);
+
     boolean existsByUserIdAndProductId(User userId, Product productId);
 
     boolean existsFavoriteProductById(Long id);
