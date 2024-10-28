@@ -26,8 +26,14 @@ public class ExchangeCommandServiceImpl implements IExchangeCommandService {
 
     @Override
     public Optional<Exchange>handle(CreateExchangeCommand command) {
+
         Product productOwn= productRepository.findById(command.productOwnId()).orElseThrow(() -> new IllegalArgumentException("Product Own not found"));
         Product productChange = productRepository.findById(command.productChangeId()).orElseThrow(() -> new IllegalArgumentException("Product Change not found"));
+
+        var result=exchangeRepository.findExchangeByProductOwnIdAndProductChangeId(productOwn, productChange);
+        if(result!=null){
+            throw new IllegalArgumentException("Exchange already exists");
+        }
         var exchange = new Exchange(command, productOwn, productChange);
         var createdExchange = exchangeRepository.save(exchange);
         return Optional.of(createdExchange);
@@ -59,6 +65,9 @@ public class ExchangeCommandServiceImpl implements IExchangeCommandService {
                 productRepository.save(productOwn);
                 productRepository.save(productChange);
             }
+
+            exchangeRepository.updateExchangeStatusToRejectedByProductOwnExcept(productOwn, exchange.getId());
+            exchangeRepository.updateExchangeStatusToRejectedByProductChangeExcept(productChange, exchange.getId());
 
             return Optional.of(updatedExchange);
         } catch (Exception e) {

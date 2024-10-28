@@ -44,9 +44,13 @@ public class Subscription {
 
     public Subscription(CreateSubscriptionCommand command, Plan plan, User user) {
         this.startDate = LocalDate.now();
-        this.endDate = startDate.plusMonths(1);
         this.state = command.state();
         this.planId = plan;
+        if(planId.getId() == 1){
+            this.endDate = null;
+        } else {
+            this.endDate = startDate.plusMonths(1);
+        }
         this.userId = user;
     }
 

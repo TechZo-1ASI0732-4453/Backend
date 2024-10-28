@@ -5,6 +5,6 @@ import com.techzo.cambiazo.exchanges.interfaces.rest.resources.SubscriptionResou
 
 public class SubscriptionResourceFromEntityAssembler {
     public static SubscriptionResource toResourceFromEntity(Subscription entity) {
-        return new SubscriptionResource(entity.getId(),entity.getState(),entity.getPlanId(),entity.getUserId());
+        return new SubscriptionResource(entity.getId(),entity.getState(),entity.getPlanId(),entity.getUserId(), entity.getStartDate(), entity.getEndDate());
     }
 }
