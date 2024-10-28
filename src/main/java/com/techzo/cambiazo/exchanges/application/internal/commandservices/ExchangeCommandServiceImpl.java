@@ -69,7 +69,7 @@ public class ExchangeCommandServiceImpl implements IExchangeCommandService {
     @Override
     public boolean handleDeleteExchange(Long id){
         Optional<Exchange>exchange = exchangeRepository.findById(id);
-        if(exchange.isPresent()){
+        if(exchange.isPresent() && exchange.get().getStatus().equals("Pendiente")){
             exchangeRepository.delete(exchange.get());
             return true;
         }else {

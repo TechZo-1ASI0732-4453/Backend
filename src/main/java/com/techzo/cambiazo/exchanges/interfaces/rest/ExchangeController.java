@@ -114,4 +114,15 @@ public class ExchangeController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @DeleteMapping("/delete/{exchangeId}")
+    public ResponseEntity<Void>deleteExchange(@PathVariable Long exchangeId) {
+        try {
+            exchangeCommandService.handleDeleteExchange(exchangeId);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 }
