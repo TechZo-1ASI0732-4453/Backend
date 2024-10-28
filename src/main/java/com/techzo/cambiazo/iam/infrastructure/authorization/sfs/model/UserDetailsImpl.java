@@ -23,6 +23,7 @@ public class UserDetailsImpl implements UserDetails {
     private final String name; // Added name
     private final String phoneNumber; // Added phone number
     private final String profilePicture; // Added profile picture
+    private final boolean isActive; // Added isActive
 
     @JsonIgnore
     private final String password;
@@ -32,12 +33,13 @@ public class UserDetailsImpl implements UserDetails {
     private final boolean enabled;
     private final Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailsImpl(String username, String password, String name, String phoneNumber, String profilePicture, Collection<? extends GrantedAuthority> authorities) {
+    public UserDetailsImpl(String username, String password, String name, String phoneNumber, String profilePicture,boolean isActive,Collection<? extends GrantedAuthority> authorities) {
         this.username = username;
         this.password = password;
         this.name = name;
         this.phoneNumber = phoneNumber;
         this.profilePicture = profilePicture;
+        this.isActive = isActive;
         this.authorities = authorities;
         this.accountNonExpired = true;
         this.accountNonLocked = true;
@@ -61,6 +63,7 @@ public class UserDetailsImpl implements UserDetails {
                 user.getName(), // Added name
                 user.getPhoneNumber(), // Added phone number
                 user.getProfilePicture(), // Added profile picture
+                user.getIsActive(), // Added isActive
                 authorities);
     }
 

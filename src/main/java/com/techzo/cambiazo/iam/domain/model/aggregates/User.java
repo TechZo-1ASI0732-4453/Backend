@@ -46,6 +46,9 @@ public class User extends AuditableAbstractAggregateRoot<User> {
     @Column(columnDefinition = "TEXT")
     private String profilePicture;
 
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(	name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -70,12 +73,13 @@ public class User extends AuditableAbstractAggregateRoot<User> {
         addRoles(roles);
     }
 
-    public User updateInformation(String username, String password, String name, String phoneNumber, String profilePicture){
+    public User updateInformation(String username, String password, String name, String phoneNumber, String profilePicture, boolean isActive){
         this.username=username;
         this.password=password;
         this.name=name;
         this.phoneNumber=phoneNumber;
         this.profilePicture=profilePicture;
+        this.isActive=isActive;
         return this;
     }
 
