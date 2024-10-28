@@ -16,6 +16,7 @@ import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.RoleR
 import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -126,22 +127,18 @@ public class UserCommandServiceImpl implements UserCommandService {
     }
 
     @Override
+    @Transactional
     public boolean handleDeleteUserCommand(Long id){
-        var user = userRepository.findById(id);
-        if (user.isEmpty())
-            throw new RuntimeException("User not found");
-
-        var userToDelete = user.get();
+        var user = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         try{
-            List<FavoriteProduct> favoriteProducts = favoriteProductRepository.findFavoriteProductsByUserId(userToDelete);
+            List<FavoriteProduct> favoriteProducts = favoriteProductRepository.findFavoriteProductsByUserId(user);
             favoriteProductRepository.deleteAll(favoriteProducts);
-
-            productRepository.updateProductAvailabilityByUser(userToDelete);
-            List<Subscription> subscriptions = subscriptionRepository.findAllByUserId(userToDelete);
+            productRepository.updateProductAvailabilityByUser(user);
+            List<Subscription> subscriptions = subscriptionRepository.findAllByUserId(user);
             subscriptionRepository.deleteAll(subscriptions);
             userRepository.save(
-                    userToDelete.updateInformation(
+                    user.updateInformation(
                             "deleted_"+ UUID.randomUUID() + "@cambiazo.com"
                             ,hashingService.encode(UUID.randomUUID().toString())
                             ,"Usuario de Cambiazo"
