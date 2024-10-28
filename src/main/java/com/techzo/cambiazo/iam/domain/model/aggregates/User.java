@@ -26,7 +26,7 @@ import java.util.Set;
 public class User extends AuditableAbstractAggregateRoot<User> {
 
     @NotBlank
-    @Size(max = 50)
+    @Size(max = 70)
     @Email // Validating the username as email
     @Column(unique = true)
     private String username; // Used as email
