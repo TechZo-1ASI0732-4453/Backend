@@ -85,4 +85,13 @@ public class UsersController {
         var authenticatedUserResource = AuthenticatedUserResourceFromEntityAssembler.toResourceFromEntity(user.get().getLeft(), user.get().getRight());
         return ResponseEntity.ok(authenticatedUserResource);
     }
+
+    @DeleteMapping(value = "/delete/{userId}")
+    public ResponseEntity<Void>deleteUser(@PathVariable Long userId){
+        var result = userCommandService.handleDeleteUserCommand(userId);
+        if (!result) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.noContent().build();
+    }
 }

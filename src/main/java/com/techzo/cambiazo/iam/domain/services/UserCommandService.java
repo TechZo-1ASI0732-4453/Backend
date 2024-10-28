@@ -16,4 +16,5 @@ public interface UserCommandService {
 
     Optional<ImmutablePair<User, String>>handle(UpdateProfileUserCommand command);
 
+    boolean handleDeleteUserCommand(Long id);
 }

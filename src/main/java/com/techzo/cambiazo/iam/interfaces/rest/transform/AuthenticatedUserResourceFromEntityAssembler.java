@@ -5,6 +5,6 @@ import com.techzo.cambiazo.iam.interfaces.rest.resources.AuthenticatedUserResour
 
 public class AuthenticatedUserResourceFromEntityAssembler {
     public static AuthenticatedUserResource toResourceFromEntity(User user, String token) {
-        return new AuthenticatedUserResource(user.getId(), user.getUsername(), user.getName(), user.getPhoneNumber(), user.getProfilePicture(), token);
+        return new AuthenticatedUserResource(user.getId(), user.getUsername(), user.getName(), user.getPhoneNumber(), user.getProfilePicture(),user.getIsActive(), token);
     }
 }
