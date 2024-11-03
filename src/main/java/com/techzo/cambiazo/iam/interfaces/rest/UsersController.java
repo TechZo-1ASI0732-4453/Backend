@@ -97,14 +97,13 @@ public class UsersController {
     }
 
     @GetMapping("/username/{username}")
-    public ResponseEntity<UserResource2> getUserByUsername(@PathVariable String username) {
+    public ResponseEntity<Void> getUserByUsername(@PathVariable String username) {
         var getUserByUsernameQuery = new GetUserByEmailQuery(username);
         var user = userQueryService.handle(getUserByUsernameQuery);
         if (user.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        var userResource = UserResource2FromEntityAssembler.toResourceFromEntity(user.get());
-        return ResponseEntity.ok(userResource);
+        return ResponseEntity.ok().build();
     }
 
 }
