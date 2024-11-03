@@ -56,9 +56,6 @@ public class ProductCommandServiceImpl implements IProductCommandService {
 
     @Override
     public Optional<Product>handle(UpdateProductCommand command){
-        if(productRepository.existsByNameAndId(command.name(), command.id())){
-            throw new IllegalArgumentException("Product with same name already exists");
-        }
 
         var result=productRepository.findById(command.id());
 

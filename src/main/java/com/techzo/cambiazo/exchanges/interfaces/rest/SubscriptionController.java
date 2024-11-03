@@ -1,6 +1,8 @@
 package com.techzo.cambiazo.exchanges.interfaces.rest;
 
 
+import com.techzo.cambiazo.exchanges.domain.model.dtos.SubscriptionDto;
+import com.techzo.cambiazo.exchanges.domain.model.queries.GetActiveSubscriptionByUserIdQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllSubscriptionsQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetSubscriptionByIdQuery;
 import com.techzo.cambiazo.exchanges.domain.services.ISubscriptionCommandService;
@@ -49,12 +51,11 @@ public class SubscriptionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SubscriptionResource>getSubscriptionById(@PathVariable Long id){
+    public ResponseEntity<SubscriptionDto>getSubscriptionById(@PathVariable Long id){
         try{
             var getSubscriptionByIdQuery = new GetSubscriptionByIdQuery(id);
             var subscription = subscriptionQueryService.handle(getSubscriptionByIdQuery);
-            var subscriptionResource = SubscriptionResourceFromEntityAssembler.toResourceFromEntity(subscription.get());
-            return ResponseEntity.ok(subscriptionResource);
+            return ResponseEntity.ok(subscription.get());
         }catch (Exception e){
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
@@ -62,12 +63,11 @@ public class SubscriptionController {
     }
 
     @GetMapping("/user/{id}")
-    public ResponseEntity<SubscriptionResource>getSubscriptionByUserId(@PathVariable Long id){
+    public ResponseEntity<SubscriptionDto>getSubscriptionByUserId(@PathVariable Long id){
         try{
-            var getSubscriptionByUserIdQuery = new GetSubscriptionByIdQuery(id);
+            var getSubscriptionByUserIdQuery = new GetActiveSubscriptionByUserIdQuery(id);
             var subscription = subscriptionQueryService.handle(getSubscriptionByUserIdQuery);
-            var subscriptionResource = SubscriptionResourceFromEntityAssembler.toResourceFromEntity(subscription.get());
-            return ResponseEntity.ok(subscriptionResource);
+            return ResponseEntity.ok(subscription.get());
         }catch (Exception e){
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
@@ -76,14 +76,11 @@ public class SubscriptionController {
 
 
     @GetMapping
-    public ResponseEntity<List<SubscriptionResource>>getAllSubscriptions(){
+    public ResponseEntity<List<SubscriptionDto>>getAllSubscriptions(){
         try {
             var getAllSubscriptionQuery = new GetAllSubscriptionsQuery();
             var subscriptions = subscriptionQueryService.handle(getAllSubscriptionQuery);
-            var subscriptionResource = subscriptions.stream()
-                    .map(SubscriptionResourceFromEntityAssembler::toResourceFromEntity)
-                    .toList();
-            return ResponseEntity.ok(subscriptionResource);
+            return ResponseEntity.ok(subscriptions);
         }catch (Exception e ){
             e.printStackTrace();
             return ResponseEntity.badRequest().build();

@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Getter
@@ -20,10 +22,10 @@ public class Subscription {
     private Long id;
 
     @Column(nullable = false)
-    private LocalDate startDate;
+    private LocalDateTime startDate;
 
     @Column(nullable = false)
-    private LocalDate endDate;
+    private LocalDateTime endDate;
 
     @Column(nullable = false)
     @NotNull(message="State is mandatory")
@@ -43,18 +45,18 @@ public class Subscription {
     }
 
     public Subscription(CreateSubscriptionCommand command, Plan plan, User user) {
-        this.startDate = LocalDate.now();
+        this.startDate = LocalDateTime.now();
         this.state = command.state();
         this.planId = plan;
         if(planId.getId() == 1){
-            this.endDate = null;
+            this.endDate =  startDate.plusYears(3);
         } else {
             this.endDate = startDate.plusMonths(1);
         }
         this.userId = user;
     }
 
-    public Subscription updateInformation(LocalDate startDate, LocalDate endDate, String state, Plan plan, User user) {
+    public Subscription updateInformation(LocalDateTime startDate, LocalDateTime endDate, String state, Plan plan, User user) {
         this.startDate = startDate;
         this.endDate = endDate;
         this.state = state;

@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.exchanges.interfaces.rest;
 
 
+import com.techzo.cambiazo.exchanges.domain.model.dtos.FavoriteProductDto;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllFavoriteProductsByUserIdQuery;
 import com.techzo.cambiazo.exchanges.domain.services.IFavoriteProductQueryService;
 import com.techzo.cambiazo.exchanges.domain.services.IFavoriteProductCommandService;
@@ -45,14 +46,11 @@ public class FavoriteProductController {
 
     @Operation(summary="Get Favorite Products by User Id", description="Get Favorite Products by User Id with the input data.")
     @GetMapping("/{userId}")
-    public ResponseEntity<List<FavoriteProductResource>>getFavoriteProductsByUserId(@PathVariable Long userId) {
+    public ResponseEntity<List<FavoriteProductDto>>getFavoriteProductsByUserId(@PathVariable Long userId) {
         try {
             var getFavoriteProductsByUserIdQuery = new GetAllFavoriteProductsByUserIdQuery(userId);
             var favoriteProducts = favoriteProductQueryService.handle(getFavoriteProductsByUserIdQuery);
-            var favoriteProductResource = favoriteProducts.stream()
-                    .map(FavoriteProductResourceFromEntityAssembler::toResourceFromEntity)
-                    .toList();
-            return ResponseEntity.ok(favoriteProductResource);
+            return ResponseEntity.ok(favoriteProducts);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }

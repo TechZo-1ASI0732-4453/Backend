@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -35,16 +36,21 @@ public class SubscriptionCommandServiceImpl implements ISubscriptionCommandServi
 
         User user = userRepository.findById(command.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User with the given id does not exist"));
-        var result=subscriptionRepository.findByUserId(user);
+        var result=subscriptionRepository.findSubscriptionActiveByUserId(user);
+
         if(result.isPresent()){
-            throw new IllegalArgumentException("User already has a subscription");
-        }else{
-            Plan plan = planRepository.findById(command.planId())
+            var subscriptionToUpdate = result.get();
+            LocalDateTime endDate = LocalDateTime.now();
+            Plan plan = planRepository.findById(subscriptionToUpdate.getPlanId())
                     .orElseThrow(() -> new IllegalArgumentException("Plan with the given id does not exist"));
-            var subscription = new Subscription(command, plan, user);
-            subscriptionRepository.save(subscription);
-            return Optional.of(subscription);
+            subscriptionRepository.save(subscriptionToUpdate.updateInformation(subscriptionToUpdate.getStartDate(),endDate,"Inactivo",plan,user));
         }
+
+        Plan plan = planRepository.findById(command.planId())
+                .orElseThrow(() -> new IllegalArgumentException("Plan with the given id does not exist"));
+        var subscription = new Subscription(command, plan, user);
+        subscriptionRepository.save(subscription);
+        return Optional.of(subscription);
     }
 
     @Override
@@ -65,8 +71,8 @@ public class SubscriptionCommandServiceImpl implements ISubscriptionCommandServi
             User user = userRepository.findById(subscription.getUserId())
                     .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-            LocalDate startDate = LocalDate.now();
-            LocalDate endDate = startDate.plusMonths(1);
+            LocalDateTime startDate = LocalDateTime.now();
+            LocalDateTime endDate = startDate.plusMonths(1);
 
 
             var updatedSubscription = subscriptionRepository.save(subscriptionToUpdate.updateInformation(startDate,endDate,command.state(),plan,user));
