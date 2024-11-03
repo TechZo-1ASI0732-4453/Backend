@@ -1,13 +1,20 @@
 package com.techzo.cambiazo.exchanges.application.internal.queryservices;
 
+import com.techzo.cambiazo.exchanges.domain.model.dtos.SubscriptionDto;
+import com.techzo.cambiazo.exchanges.domain.model.entities.Benefit;
+import com.techzo.cambiazo.exchanges.domain.model.entities.Plan;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Subscription;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllSubscriptionsQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetSubscriptionByIdQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetActiveSubscriptionByUserIdQuery;
 import com.techzo.cambiazo.exchanges.domain.services.ISubscriptionQueryService;
+import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IBenefitRepository;
+import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IPlanRepository;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.ISubscriptionRepository;
 import com.techzo.cambiazo.iam.domain.model.aggregates.User;
 import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.UserRepository;
+import com.techzo.cambiazo.iam.interfaces.rest.resources.UserResource2;
+import com.techzo.cambiazo.iam.interfaces.rest.transform.UserResource2FromEntityAssembler;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,25 +28,57 @@ public class SubscriptionQueryServiceImpl implements ISubscriptionQueryService {
 
     private final UserRepository userRepository;
 
-    public SubscriptionQueryServiceImpl(ISubscriptionRepository subscriptionRepository, UserRepository userRepository){
+    private final IPlanRepository planRepository;
+
+    private final IBenefitRepository benefitRepository;
+
+    public SubscriptionQueryServiceImpl(ISubscriptionRepository subscriptionRepository, UserRepository userRepository, IPlanRepository planRepository, IBenefitRepository benefitRepository){
         this.subscriptionRepository = subscriptionRepository;
         this.userRepository = userRepository;
+        this.planRepository = planRepository;
+        this.benefitRepository = benefitRepository;
     }
 
     @Override
-    public Optional<Subscription> handle(GetSubscriptionByIdQuery query) {
-        return this.subscriptionRepository.findById(query.id());
+    public Optional<SubscriptionDto> handle(GetSubscriptionByIdQuery query) {
+        Subscription subscription = this.subscriptionRepository.findById(query.id())
+                .orElseThrow(() -> new IllegalArgumentException("Subscription with id "+query.id()+" not found"));
+
+        Plan plan = this.planRepository.findById(subscription.getPlanId())
+                .orElseThrow(() -> new IllegalArgumentException("Plan with id "+subscription.getPlanId()+" not found"));
+
+        List<Benefit>benefits= this.benefitRepository.findBenefitsByPlanId(plan);
+
+        return Optional.of(new SubscriptionDto(subscription, plan, benefits));
     }
 
     @Override
-    public Optional<Subscription> handle(GetActiveSubscriptionByUserIdQuery query) {
+    public Optional<SubscriptionDto> handle(GetActiveSubscriptionByUserIdQuery query) {
         User user = this.userRepository.findById(query.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User with id "+query.userId()+" not found"));
-        return this.subscriptionRepository.findSubscriptionActiveByUserId(user);
+
+        Subscription subscription = this.subscriptionRepository.findSubscriptionActiveByUserId(user)
+                .orElseThrow(() -> new IllegalArgumentException("Active subscription for user with id "+query.userId()+" not found"));
+
+        Plan plan = this.planRepository.findById(subscription.getPlanId())
+                .orElseThrow(() -> new IllegalArgumentException("Plan with id "+subscription.getPlanId()+" not found"));
+
+        List<Benefit>benefits= this.benefitRepository.findBenefitsByPlanId(plan);
+
+        return Optional.of(new SubscriptionDto(subscription, plan, benefits));
     }
 
     @Override
-    public List<Subscription> handle(GetAllSubscriptionsQuery query) {
-        return this.subscriptionRepository.findAll();
+    public List<SubscriptionDto> handle(GetAllSubscriptionsQuery query) {
+        List<Subscription>subscriptions = this.subscriptionRepository.findAll();
+
+        return subscriptions.stream().map(subscription->{
+            Plan plan = this.planRepository.findById(subscription.getPlanId())
+                    .orElseThrow(() -> new IllegalArgumentException("Plan with id "+subscription.getPlanId()+" not found"));
+
+            List<Benefit>benefits= this.benefitRepository.findBenefitsByPlanId(plan);
+
+            return new SubscriptionDto(subscription, plan, benefits);
+        }).toList();
     }
 }
