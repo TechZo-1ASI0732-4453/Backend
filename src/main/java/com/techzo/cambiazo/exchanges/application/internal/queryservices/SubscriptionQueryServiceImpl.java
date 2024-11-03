@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.exchanges.application.internal.queryservices;
 
+import com.techzo.cambiazo.exchanges.domain.model.dtos.PlanDto;
 import com.techzo.cambiazo.exchanges.domain.model.dtos.SubscriptionDto;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Benefit;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Plan;
@@ -49,7 +50,9 @@ public class SubscriptionQueryServiceImpl implements ISubscriptionQueryService {
 
         List<Benefit>benefits= this.benefitRepository.findBenefitsByPlanId(plan);
 
-        return Optional.of(new SubscriptionDto(subscription, plan, benefits));
+        PlanDto planDto = new PlanDto(plan, benefits);
+
+        return Optional.of(new SubscriptionDto(subscription, planDto));
     }
 
     @Override
@@ -65,7 +68,9 @@ public class SubscriptionQueryServiceImpl implements ISubscriptionQueryService {
 
         List<Benefit>benefits= this.benefitRepository.findBenefitsByPlanId(plan);
 
-        return Optional.of(new SubscriptionDto(subscription, plan, benefits));
+        PlanDto planDto = new PlanDto(plan, benefits);
+
+        return Optional.of(new SubscriptionDto(subscription, planDto));
     }
 
     @Override
@@ -78,7 +83,8 @@ public class SubscriptionQueryServiceImpl implements ISubscriptionQueryService {
 
             List<Benefit>benefits= this.benefitRepository.findBenefitsByPlanId(plan);
 
-            return new SubscriptionDto(subscription, plan, benefits);
+            PlanDto planDto = new PlanDto(plan, benefits);
+            return new SubscriptionDto(subscription, planDto);
         }).toList();
     }
 }

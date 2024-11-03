@@ -30,20 +30,17 @@ public class SubscriptionDto {
 
     private Long userId;
 
-    private Plan plan;
-
-    private List<Benefit>benefits;
+    private PlanDto plan;
 
     public SubscriptionDto(){
     }
 
-    public SubscriptionDto(Subscription subscription,Plan plan, List<Benefit>benefits){
+    public SubscriptionDto(Subscription subscription,PlanDto plan){
         this.id = subscription.getId();
         this.startDate = subscription.getStartDate();
         this.endDate = subscription.getEndDate();
         this.state = subscription.getState();
         this.userId = subscription.getUserId();
         this.plan = plan;
-        this.benefits = benefits;
     }
 }
