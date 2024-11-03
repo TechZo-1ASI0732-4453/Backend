@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.exchanges.interfaces.rest;
 
 
+import com.techzo.cambiazo.exchanges.domain.model.dtos.PlanDto;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllPlansQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetPlanByIdQuery;
 import com.techzo.cambiazo.exchanges.domain.services.IPlanCommandService;
@@ -45,12 +46,11 @@ public class PlanController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PlanResource>getPlanById(@PathVariable Long id){
+    public ResponseEntity<PlanDto>getPlanById(@PathVariable Long id){
         try{
             var getPlanByIdQuery = new GetPlanByIdQuery(id);
             var plan = planQueryService.handle(getPlanByIdQuery);
-            var planResource = PlanResourceFromEntityAssembler.toResourceFromEntity(plan.get());
-            return ResponseEntity.ok(planResource);
+            return ResponseEntity.ok(plan.get());
         }catch (Exception e){
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
@@ -58,14 +58,11 @@ public class PlanController {
     }
 
     @GetMapping
-    public ResponseEntity<List<PlanResource>>getAllPlans(){
+    public ResponseEntity<List<PlanDto>>getAllPlans(){
         try {
             var getAllPlanQuery = new GetAllPlansQuery();
             var plans = planQueryService.handle(getAllPlanQuery);
-            var planResource = plans.stream()
-                    .map(PlanResourceFromEntityAssembler::toResourceFromEntity)
-                    .toList();
-            return ResponseEntity.ok(planResource);
+            return ResponseEntity.ok(plans);
         }catch (Exception e){
             e.printStackTrace();
             return ResponseEntity.badRequest().build();
