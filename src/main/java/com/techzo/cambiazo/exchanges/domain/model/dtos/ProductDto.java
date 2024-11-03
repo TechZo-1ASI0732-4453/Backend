@@ -19,5 +19,19 @@ public class ProductDto {
     private UserResource2 user;
     private ProductCategory productCategory;
     private Location location;
+
+    public ProductDto(Product product, UserResource2 user, ProductCategory productCategory, Location location) {
+        this.id = product.getId();
+        this.name = product.getName();
+        this.description = product.getDescription();
+        this.desiredObject = product.getDesiredObject();
+        this.price = product.getPrice();
+        this.image = product.getImage();
+        this.boost = product.getBoost();
+        this.available = product.getAvailable();
+        this.user = user;
+        this.productCategory = productCategory;
+        this.location = location;
+    }
 }
 
