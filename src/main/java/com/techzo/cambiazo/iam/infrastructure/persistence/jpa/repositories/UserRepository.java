@@ -11,8 +11,7 @@ import java.util.Optional;
  * It extends the JpaRepository interface.
  */
 @Repository
-public interface UserRepository extends JpaRepository<User, Long>
-{
+public interface UserRepository extends JpaRepository<User, Long> {
     /**
      * This method is responsible for finding the user by username.
      * @param username The username.
