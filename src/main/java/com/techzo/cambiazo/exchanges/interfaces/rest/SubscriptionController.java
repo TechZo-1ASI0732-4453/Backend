@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.exchanges.interfaces.rest;
 
 
+import com.techzo.cambiazo.exchanges.domain.model.queries.GetActiveSubscriptionByUserIdQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllSubscriptionsQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetSubscriptionByIdQuery;
 import com.techzo.cambiazo.exchanges.domain.services.ISubscriptionCommandService;
@@ -64,7 +65,7 @@ public class SubscriptionController {
     @GetMapping("/user/{id}")
     public ResponseEntity<SubscriptionResource>getSubscriptionByUserId(@PathVariable Long id){
         try{
-            var getSubscriptionByUserIdQuery = new GetSubscriptionByIdQuery(id);
+            var getSubscriptionByUserIdQuery = new GetActiveSubscriptionByUserIdQuery(id);
             var subscription = subscriptionQueryService.handle(getSubscriptionByUserIdQuery);
             var subscriptionResource = SubscriptionResourceFromEntityAssembler.toResourceFromEntity(subscription.get());
             return ResponseEntity.ok(subscriptionResource);

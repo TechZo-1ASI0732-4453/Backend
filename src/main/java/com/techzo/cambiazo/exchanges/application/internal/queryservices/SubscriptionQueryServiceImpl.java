@@ -3,7 +3,7 @@ package com.techzo.cambiazo.exchanges.application.internal.queryservices;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Subscription;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllSubscriptionsQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetSubscriptionByIdQuery;
-import com.techzo.cambiazo.exchanges.domain.model.queries.GetSubscriptionByUserIdQuery;
+import com.techzo.cambiazo.exchanges.domain.model.queries.GetActiveSubscriptionByUserIdQuery;
 import com.techzo.cambiazo.exchanges.domain.services.ISubscriptionQueryService;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.ISubscriptionRepository;
 import com.techzo.cambiazo.iam.domain.model.aggregates.User;
@@ -32,10 +32,10 @@ public class SubscriptionQueryServiceImpl implements ISubscriptionQueryService {
     }
 
     @Override
-    public Optional<Subscription> handle(GetSubscriptionByUserIdQuery query) {
+    public Optional<Subscription> handle(GetActiveSubscriptionByUserIdQuery query) {
         User user = this.userRepository.findById(query.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User with id "+query.userId()+" not found"));
-        return this.subscriptionRepository.findByUserId(user);
+        return this.subscriptionRepository.findSubscriptionActiveByUserId(user);
     }
 
     @Override
