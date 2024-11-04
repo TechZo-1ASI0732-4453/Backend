@@ -1,6 +1,8 @@
 package com.techzo.cambiazo.iam.application.internal.commandservices;
 
+import com.techzo.cambiazo.exchanges.domain.model.commands.CreateSubscriptionCommand;
 import com.techzo.cambiazo.exchanges.domain.model.entities.FavoriteProduct;
+import com.techzo.cambiazo.exchanges.domain.model.entities.Plan;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Product;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Subscription;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.*;
@@ -18,6 +20,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -42,10 +45,11 @@ public class UserCommandServiceImpl implements UserCommandService {
 
     private final ISubscriptionRepository subscriptionRepository;
 
+    private final IPlanRepository planRepository;
     private final RoleRepository roleRepository;
 
 
-    public UserCommandServiceImpl(UserRepository userRepository, HashingService hashingService, TokenService tokenService, RoleRepository roleRepository, IFavoriteProductRepository favoriteProductRepository, IProductRepository productRepository, ISubscriptionRepository subscriptionRepository) {
+    public UserCommandServiceImpl(UserRepository userRepository, HashingService hashingService, TokenService tokenService, RoleRepository roleRepository, IFavoriteProductRepository favoriteProductRepository, IProductRepository productRepository, ISubscriptionRepository subscriptionRepository, IPlanRepository planRepository) {
         this.userRepository = userRepository;
         this.hashingService = hashingService;
         this.tokenService = tokenService;
@@ -53,6 +57,7 @@ public class UserCommandServiceImpl implements UserCommandService {
         this.favoriteProductRepository = favoriteProductRepository;
         this.productRepository = productRepository;
         this.subscriptionRepository = subscriptionRepository;
+        this.planRepository = planRepository;
     }
 
     /**
@@ -89,6 +94,12 @@ public class UserCommandServiceImpl implements UserCommandService {
             throw new RuntimeException("Username already exists");
         var roles = command.roles().stream().map(role -> roleRepository.findByName(role.getName()).orElseThrow(() -> new RuntimeException("Role name not found"))).toList();
         var user = new User(command.username(), hashingService.encode(command.password()), command.name(), command.phoneNumber(), command.profilePicture(),roles);
+
+        Plan plan = planRepository.findById(1L).orElseThrow(() -> new IllegalArgumentException("Plan with the given id does not exist"));
+
+        CreateSubscriptionCommand subscriptionCommand = new CreateSubscriptionCommand("Activo", 1L, user.getId());
+        var subscription = new Subscription(subscriptionCommand, plan, user);
+        subscriptionRepository.save(subscription);
         userRepository.save(user);
         return userRepository.findByUsername(command.username());
     }
