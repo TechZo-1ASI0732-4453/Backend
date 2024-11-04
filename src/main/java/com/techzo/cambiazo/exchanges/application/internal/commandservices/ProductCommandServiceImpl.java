@@ -3,19 +3,18 @@ package com.techzo.cambiazo.exchanges.application.internal.commandservices;
 
 import com.techzo.cambiazo.exchanges.domain.model.commands.CreateProductCommand;
 import com.techzo.cambiazo.exchanges.domain.model.commands.UpdateProductCommand;
-import com.techzo.cambiazo.exchanges.domain.model.entities.District;
-import com.techzo.cambiazo.exchanges.domain.model.entities.FavoriteProduct;
-import com.techzo.cambiazo.exchanges.domain.model.entities.Product;
-import com.techzo.cambiazo.exchanges.domain.model.entities.ProductCategory;
+import com.techzo.cambiazo.exchanges.domain.model.entities.*;
 import com.techzo.cambiazo.exchanges.domain.services.IProductCommandService;
-import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IDistrictRepository;
-import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IFavoriteProductRepository;
-import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IProductCategoryRepository;
-import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IProductRepository;
+import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.*;
 import com.techzo.cambiazo.iam.domain.model.aggregates.User;
 import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,26 +31,103 @@ public class ProductCommandServiceImpl implements IProductCommandService {
 
     private final IFavoriteProductRepository favoriteProductRepository;
 
-    public ProductCommandServiceImpl(IProductRepository productRepository, UserRepository userRepository, IProductCategoryRepository productCategoryRepository, IDistrictRepository districtRepository, IFavoriteProductRepository favoriteProductRepository) {
+    private final ISubscriptionRepository subscriptionRepository;
+
+    private final IPlanRepository planRepository;
+
+    public ProductCommandServiceImpl(IProductRepository productRepository, UserRepository userRepository, IProductCategoryRepository productCategoryRepository, IDistrictRepository districtRepository, IFavoriteProductRepository favoriteProductRepository, ISubscriptionRepository subscriptionRepository, IPlanRepository planRepository) {
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.productCategoryRepository = productCategoryRepository;
         this.districtRepository = districtRepository;
         this.favoriteProductRepository = favoriteProductRepository;
+        this.subscriptionRepository = subscriptionRepository;
+        this.planRepository = planRepository;
     }
 
     @Override
-    public Optional<Product>handle(CreateProductCommand command) {
-        ProductCategory productCategory = productCategoryRepository.
-                findById(command.productCategoryId()).orElseThrow(() -> new IllegalArgumentException("Product Category with id not found"));
+    public Optional<Product> handle(CreateProductCommand command) {
+        User user = userRepository.findById(command.userId())
+                .orElseThrow(() -> new IllegalArgumentException("User with id not found"));
 
-        User user = userRepository.findById(command.userId()).orElseThrow(() -> new IllegalArgumentException("User with id not found"));
+        Subscription subscription = subscriptionRepository.findSubscriptionActiveByUserId(user)
+                .orElseThrow(() -> new IllegalArgumentException("Active subscription not found for user"));
 
-        District district= districtRepository.findById(command.districtId()).orElseThrow(() -> new IllegalArgumentException("District with id not found"));
+        Plan plan = planRepository.findById(subscription.getPlanId())
+                .orElseThrow(() -> new IllegalArgumentException("Plan with id not found"));
 
-        var product = new Product(command,productCategory,user,district);
-        productRepository.save(product);
-        return Optional.of(product);
+        if(plan.getName().equals("Lite") && command.boost().equals(true)){
+            throw new IllegalArgumentException("El plan Free no permite Boost");
+        }
+
+
+        // Inicializar el inicio del mes para contar productos publicados
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        Date initMonth = calendar.getTime();
+
+        // Contar los productos publicados por el usuario en el mes actual
+        Long countProductsPublished = productRepository.countByUserIdAndCreatedAtAfter(user, initMonth);
+        System.out.println("Productos publicados este mes: " + countProductsPublished);
+
+        // Verificar el límite de productos según el plan
+        switch (plan.getName()) {
+            case "Lite":
+                if (countProductsPublished >= 3) {
+                    throw new IllegalArgumentException("Has alcanzado el límite de productos para el plan Free este mes.");
+                }
+                break;
+            case "Plus":
+                if (countProductsPublished >= 10) {
+                    throw new IllegalArgumentException("Has alcanzado el límite de productos para el plan Plus este mes.");
+                }
+                break;
+            case "Premium":
+                // Premium no tiene límite de productos
+                break;
+            default:
+                throw new IllegalArgumentException("Plan desconocido.");
+        }
+
+        if(command.boost().equals(true)){
+            // Establecer el período de Boost según el plan
+            Date initPeriod;
+            if ("Lite".equals(plan.getName())) {
+                initPeriod = null; // El plan Free no permite Boost, así que no hay periodo de Boost.
+            } else if ("Plus".equals(plan.getName())) {
+                initPeriod = Date.from(LocalDateTime.now().minusDays(7).atZone(ZoneId.systemDefault()).toInstant());
+            } else if ("Premium".equals(plan.getName())) {
+                initPeriod = Date.from(LocalDateTime.now().minusDays(1).atZone(ZoneId.systemDefault()).toInstant());
+            } else {
+                throw new IllegalArgumentException("Plan desconocido.");
+            }
+
+            // Si el plan permite Boost, contar cuántos Boost se han usado en el período
+            if (initPeriod != null) {
+                Long countUsedBoosts = productRepository.countBoostsByUserIdAndCreatedAtAfter(user, initPeriod);
+                if ((plan.getName().equals("Plus") && countUsedBoosts >= 3) ||
+                        (plan.getName().equals("Premium") && countUsedBoosts >= 1)) {
+                    throw new IllegalArgumentException("Has alcanzado el límite de Boost para tu plan.");
+                }
+            }
+        }
+
+        ProductCategory productCategory = productCategoryRepository.findById(command.productCategoryId())
+                .orElseThrow(() -> new IllegalArgumentException("Product Category with id not found"));
+        District district = districtRepository.findById(command.districtId())
+                .orElseThrow(() -> new IllegalArgumentException("District with id not found"));
+
+        try {
+            var product = new Product(command, productCategory, user, district);
+            productRepository.save(product);
+            return Optional.of(product);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Error while creating product: " + e.getMessage());
+        }
     }
 
     @Override
