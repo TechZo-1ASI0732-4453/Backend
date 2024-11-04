@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -19,6 +21,12 @@ public interface IProductRepository extends JpaRepository<Product, Long> {
     List<Product>findProductsByUserId(User userId);
 
     List<Product>findProductsByProductCategoryId(ProductCategory productCategoryId);
+
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.userId = :userId AND p.createdAt > :createdAt")
+    Long countByUserIdAndCreatedAtAfter(User userId, Date createdAt);
+
+    @Query("SELECT COUNT(p) FROM Product p WHERE p.userId = :userId AND p.createdAt > :createdAt AND p.boost=true")
+    Long countBoostsByUserIdAndCreatedAtAfter(User userId, Date createdAt);
 
     @Modifying
     @Query("UPDATE Product p SET p.available = false WHERE p.userId = :user")
