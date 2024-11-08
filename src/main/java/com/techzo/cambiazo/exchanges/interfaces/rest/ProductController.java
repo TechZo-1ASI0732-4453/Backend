@@ -115,23 +115,13 @@ public class ProductController {
     }
 
 
-    @PutMapping("/delete-product/{productId}")
-    public ResponseEntity<Void> updateProductOfPendingExchanges(@PathVariable Long productId) {
-        try {
-            var deleteProductOfPendingExchangesCommand = new DeleteProductOfPendingExchangesCommand(productId);
-            productCommandService.deleteProductOfPendingExchanges(deleteProductOfPendingExchangesCommand);
-            return ResponseEntity.ok().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
 
     @Operation(summary = "Delete a Product", description = "Delete a Product with the input data.")
     @DeleteMapping("/delete/{productId}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long productId) {
         try {
-            productCommandService.handleDeleteProduct(productId);
+            var deleteProductCommand = new DeleteProductOfPendingExchangesCommand(productId);
+            productCommandService.handleDeleteProduct(deleteProductCommand);
             return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
