@@ -11,7 +11,5 @@ public interface IProductCommandService {
     Optional<Product>handle(CreateProductCommand command);
 
     Optional<Product>handle(UpdateProductCommand command);
-
-    boolean deleteProductOfPendingExchanges(DeleteProductOfPendingExchangesCommand command);
-    boolean handleDeleteProduct(Long id);
+    boolean handleDeleteProduct(DeleteProductOfPendingExchangesCommand command);
 }

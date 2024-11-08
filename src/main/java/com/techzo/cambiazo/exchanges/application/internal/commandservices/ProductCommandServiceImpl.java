@@ -167,42 +167,21 @@ public class ProductCommandServiceImpl implements IProductCommandService {
 
     }
 
-    @Override
-    @Transactional
-    public boolean deleteProductOfPendingExchanges(DeleteProductOfPendingExchangesCommand command){
-        Product product = productRepository.findById(command.id())
-                .orElseThrow(() -> new IllegalArgumentException("Product with id not found"));
-
-        ProductCategory productCategory = productCategoryRepository.findById(product.getProductCategoryId())
-                .orElseThrow(() -> new IllegalArgumentException("Product Category with id not found"));
-
-        User user = userRepository.findById(product.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User with id not found"));
-
-        District district = districtRepository.findById(product.getDistrictId())
-                .orElseThrow(() -> new IllegalArgumentException("District with id not found"));
-
-
-
-        productRepository.save(product.updateInformation(product.getName(), product.getDescription(), product.getDesiredObject(),
-                product.getPrice(), product.getImage(), product.getBoost(), false, productCategory, user, district));
-
-        exchangeRepository.updatedExchangeStatusForProductChangeStatusAvailableFalse(product);
-        exchangeRepository.updatedExchangeStatusForProductOwnStatusAvailableFalse(product);
-        return true;
-    }
 
 
 
 
     @Override
-    public boolean handleDeleteProduct(Long id) {
-        Optional<Product> product = productRepository.findById(id);
+    public boolean handleDeleteProduct(DeleteProductOfPendingExchangesCommand command) {
+        Optional<Product> product = productRepository.findById(command.id());
         if (product.isEmpty()) {
             throw new IllegalArgumentException("Product not found");
         }
         List<FavoriteProduct> favoriteProducts = favoriteProductRepository.findFavoriteProductsByProductId(product.get());
 
+        List<Exchange> exchanges = exchangeRepository.findAllExchangesByProductOwnIdOrProductChangeId(product.get());
+
+        exchangeRepository.deleteAll(exchanges);
         favoriteProductRepository.deleteAll(favoriteProducts);
         productRepository.delete(product.get());
         return true;
