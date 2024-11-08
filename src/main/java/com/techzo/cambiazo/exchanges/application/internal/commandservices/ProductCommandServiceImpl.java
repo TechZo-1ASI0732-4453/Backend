@@ -2,6 +2,7 @@ package com.techzo.cambiazo.exchanges.application.internal.commandservices;
 
 
 import com.techzo.cambiazo.exchanges.domain.model.commands.CreateProductCommand;
+import com.techzo.cambiazo.exchanges.domain.model.commands.DeleteProductOfPendingExchangesCommand;
 import com.techzo.cambiazo.exchanges.domain.model.commands.UpdateProductCommand;
 import com.techzo.cambiazo.exchanges.domain.model.entities.*;
 import com.techzo.cambiazo.exchanges.domain.services.IProductCommandService;
@@ -9,8 +10,8 @@ import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.*;
 import com.techzo.cambiazo.iam.domain.model.aggregates.User;
 import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Calendar;
@@ -35,7 +36,9 @@ public class ProductCommandServiceImpl implements IProductCommandService {
 
     private final IPlanRepository planRepository;
 
-    public ProductCommandServiceImpl(IProductRepository productRepository, UserRepository userRepository, IProductCategoryRepository productCategoryRepository, IDistrictRepository districtRepository, IFavoriteProductRepository favoriteProductRepository, ISubscriptionRepository subscriptionRepository, IPlanRepository planRepository) {
+    private final IExchangeRepository exchangeRepository;
+
+    public ProductCommandServiceImpl(IProductRepository productRepository, UserRepository userRepository, IProductCategoryRepository productCategoryRepository, IDistrictRepository districtRepository, IFavoriteProductRepository favoriteProductRepository, ISubscriptionRepository subscriptionRepository, IPlanRepository planRepository, IExchangeRepository exchangeRepository) {
         this.productRepository = productRepository;
         this.userRepository = userRepository;
         this.productCategoryRepository = productCategoryRepository;
@@ -43,6 +46,7 @@ public class ProductCommandServiceImpl implements IProductCommandService {
         this.favoriteProductRepository = favoriteProductRepository;
         this.subscriptionRepository = subscriptionRepository;
         this.planRepository = planRepository;
+        this.exchangeRepository = exchangeRepository;
     }
 
     @Override
@@ -162,6 +166,34 @@ public class ProductCommandServiceImpl implements IProductCommandService {
         }
 
     }
+
+    @Override
+    @Transactional
+    public boolean deleteProductOfPendingExchanges(DeleteProductOfPendingExchangesCommand command){
+        Product product = productRepository.findById(command.id())
+                .orElseThrow(() -> new IllegalArgumentException("Product with id not found"));
+
+        ProductCategory productCategory = productCategoryRepository.findById(product.getProductCategoryId())
+                .orElseThrow(() -> new IllegalArgumentException("Product Category with id not found"));
+
+        User user = userRepository.findById(product.getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User with id not found"));
+
+        District district = districtRepository.findById(product.getDistrictId())
+                .orElseThrow(() -> new IllegalArgumentException("District with id not found"));
+
+
+
+        productRepository.save(product.updateInformation(product.getName(), product.getDescription(), product.getDesiredObject(),
+                product.getPrice(), product.getImage(), product.getBoost(), false, productCategory, user, district));
+
+        exchangeRepository.updatedExchangeStatusForProductChangeStatusAvailableFalse(product);
+        exchangeRepository.updatedExchangeStatusForProductOwnStatusAvailableFalse(product);
+        return true;
+    }
+
+
+
 
     @Override
     public boolean handleDeleteProduct(Long id) {
