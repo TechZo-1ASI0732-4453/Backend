@@ -105,6 +105,7 @@ public class WebSecurityConfiguration {
                                 "/api/v2/authentication/sign-up",
                                 "/api/v2/authentication/**",
                                 "/api/v2/users/username/**",
+                                "/api/v2/users/edit/password/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
