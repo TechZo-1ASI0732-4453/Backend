@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.exchanges.interfaces.rest;
 
 
+import com.techzo.cambiazo.exchanges.domain.model.commands.DeleteProductOfPendingExchangesCommand;
 import com.techzo.cambiazo.exchanges.domain.model.dtos.ProductDto;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllProductsByProductCategoryIdQuery;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllProductsByUserIdQuery;
@@ -112,6 +113,19 @@ public class ProductController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+
+    @PutMapping("/delete-product/{productId}")
+    public ResponseEntity<Void> updateProductOfPendingExchanges(@PathVariable Long productId) {
+        try {
+            var deleteProductOfPendingExchangesCommand = new DeleteProductOfPendingExchangesCommand(productId);
+            productCommandService.deleteProductOfPendingExchanges(deleteProductOfPendingExchangesCommand);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
 
     @Operation(summary = "Delete a Product", description = "Delete a Product with the input data.")
     @DeleteMapping("/delete/{productId}")

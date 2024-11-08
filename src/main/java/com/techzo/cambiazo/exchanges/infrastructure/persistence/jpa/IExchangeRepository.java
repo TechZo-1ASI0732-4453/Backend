@@ -20,6 +20,17 @@ public interface IExchangeRepository extends JpaRepository<Exchange, Long> {
 
     List<Exchange>findAllExchangesByProductChangeId_UserId(User userChangeId);
 
+
+    @Modifying
+    @Query("UPDATE Exchange p SET p.status = 'Rechazado' WHERE p.productOwnId = :product")
+    void updatedExchangeStatusForProductOwnStatusAvailableFalse(@Param("product") Product product);
+
+    @Modifying
+    @Query("UPDATE Exchange p SET p.status = 'Rechazado' WHERE p.productChangeId = :product")
+    void updatedExchangeStatusForProductChangeStatusAvailableFalse(@Param("product") Product product);
+
+
+
     @Modifying
     @Query("UPDATE Exchange p SET p.status = 'Rechazado' WHERE p.productOwnId = :product AND p.id <> :exchangeId")
     void updateExchangeStatusToRejectedByProductOwnExcept(@Param("product") Product product, @Param("exchangeId") Long exchangeId);
