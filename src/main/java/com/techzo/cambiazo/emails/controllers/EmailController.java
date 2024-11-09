@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping
+@RequestMapping("/api/v2/send-email")
 public class EmailController {
     @Autowired
     IEmailService emailService;
 
-    @PostMapping("/send-email")
+    @PostMapping
     private ResponseEntity<String>sendEmail(@RequestBody EmailDto emailDto) throws MessagingException {
         emailService.sendMail(emailDto);
         return new ResponseEntity<>("Email enviado correctamente", HttpStatus.OK);
