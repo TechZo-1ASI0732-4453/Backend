@@ -106,4 +106,15 @@ public class UsersController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/edit/password/{username}")
+    public ResponseEntity<UserResource> updateUserPassword(@PathVariable String username, @RequestBody UpdateUserPasswordResource resource) {
+        var updateUserPasswordCommand = UpdateUserPasswordCommandFromResourceAssembler.toCommandFromResource(username, resource);
+        var user = userCommandService.handle(updateUserPasswordCommand);
+        if (user.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
+        return ResponseEntity.ok(userResource);
+    }
+
 }
