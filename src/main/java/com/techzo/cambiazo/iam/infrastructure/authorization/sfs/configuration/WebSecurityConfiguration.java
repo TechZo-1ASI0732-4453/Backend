@@ -107,6 +107,7 @@ public class WebSecurityConfiguration {
                                 "/api/v2/users/username/**",
                                 "/api/v2/users/edit/password/**",
                                 "/api/v2/users/email/**",
+                                "/api/v2/send-email",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
