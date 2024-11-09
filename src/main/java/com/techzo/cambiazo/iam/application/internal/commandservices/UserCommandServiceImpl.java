@@ -91,13 +91,15 @@ public class UserCommandServiceImpl implements UserCommandService {
             throw new RuntimeException("Username already exists");
         var roles = command.roles().stream().map(role -> roleRepository.findByName(role.getName()).orElseThrow(() -> new RuntimeException("Role name not found"))).toList();
         var user = new User(command.username(), hashingService.encode(command.password()), command.name(), command.phoneNumber(), command.profilePicture(),roles);
+        userRepository.save(user);
+
+        var result=userRepository.findByUsername(command.username()).orElseThrow(() -> new IllegalArgumentException("User with the given username does not exist"));
 
         Plan plan = planRepository.findById(1L).orElseThrow(() -> new IllegalArgumentException("Plan with the given id does not exist"));
 
-        CreateSubscriptionCommand subscriptionCommand = new CreateSubscriptionCommand("Activo", 1L, user.getId());
-        var subscription = new Subscription(subscriptionCommand, plan, user);
+        CreateSubscriptionCommand subscriptionCommand = new CreateSubscriptionCommand("Activo", 1L, result.getId());
+        var subscription = new Subscription(subscriptionCommand, plan, result);
         subscriptionRepository.save(subscription);
-        userRepository.save(user);
         return userRepository.findByUsername(command.username());
     }
 
