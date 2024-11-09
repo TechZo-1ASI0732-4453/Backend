@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.iam.interfaces.rest;
 
+import com.techzo.cambiazo.iam.domain.model.dto.UserNameDto;
 import com.techzo.cambiazo.iam.domain.model.queries.GetAllUsersQuery;
 import com.techzo.cambiazo.iam.domain.model.queries.GetUserByEmailQuery;
 import com.techzo.cambiazo.iam.domain.model.queries.GetUserByIdQuery;
@@ -115,6 +116,16 @@ public class UsersController {
         }
         var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
         return ResponseEntity.ok(userResource);
+    }
+
+    @GetMapping("/email/{email}")
+    public ResponseEntity<UserNameDto> getUserByEmail(@PathVariable String email) {
+        var getUserByEmailQuery = new GetUserByEmailQuery(email);
+        var user = userQueryService.handle(getUserByEmailQuery);
+        if (user.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(user.get());
     }
 
 }

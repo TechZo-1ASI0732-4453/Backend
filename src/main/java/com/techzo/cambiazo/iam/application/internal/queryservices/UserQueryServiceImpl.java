@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.iam.application.internal.queryservices;
 
 import com.techzo.cambiazo.iam.domain.model.aggregates.User;
+import com.techzo.cambiazo.iam.domain.model.dto.UserNameDto;
 import com.techzo.cambiazo.iam.domain.model.queries.GetAllUsersQuery;
 import com.techzo.cambiazo.iam.domain.model.queries.GetUserByEmailQuery;
 import com.techzo.cambiazo.iam.domain.model.queries.GetUserByIdQuery;
@@ -68,7 +69,8 @@ public class UserQueryServiceImpl implements UserQueryService {
      * @see GetUserByEmailQuery
      */
     @Override
-    public Optional<User> handle(GetUserByEmailQuery query) {
-        return userRepository.findByUsername(query.username());
+    public Optional<UserNameDto> handle(GetUserByEmailQuery query) {
+        var result = userRepository.findByUsername(query.username());
+        return Optional.of(new UserNameDto(result.get().getName()));
     }
 }
