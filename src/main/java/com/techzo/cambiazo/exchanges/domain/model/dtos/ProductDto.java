@@ -5,6 +5,8 @@ import com.techzo.cambiazo.iam.interfaces.rest.resources.UserResource2;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 @AllArgsConstructor
 public class ProductDto {
@@ -19,6 +21,7 @@ public class ProductDto {
     private UserResource2 user;
     private ProductCategory productCategory;
     private Location location;
+    private Date createdAt;
 
     public ProductDto(Product product, UserResource2 user, ProductCategory productCategory, Location location) {
         this.id = product.getId();
@@ -32,6 +35,7 @@ public class ProductDto {
         this.user = user;
         this.productCategory = productCategory;
         this.location = location;
+        this.createdAt = product.getCreatedAt();
     }
 }
 

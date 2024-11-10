@@ -79,16 +79,17 @@ public class ProductQueryServiceImpl implements IProductQueryService {
         return Optional.of(
                 new ProductDto(
                         product.getId(),
-                product.getName(),
-                product.getDescription(),
-                product.getDesiredObject(),
-                product.getPrice(),
-                product.getImage(),
-                product.getBoost(),
-                product.getAvailable(),
-                userResource,
-                productCategory,
-                location
+                        product.getName(),
+                        product.getDescription(),
+                        product.getDesiredObject(),
+                        product.getPrice(),
+                        product.getImage(),
+                        product.getBoost(),
+                        product.getAvailable(),
+                        userResource,
+                        productCategory,
+                        location,
+                        product.getCreatedAt()
                 )
         );
     }
@@ -121,7 +122,8 @@ public class ProductQueryServiceImpl implements IProductQueryService {
                     product.getAvailable(),
                     userResource,
                     productCategory,
-                    location
+                    location,
+                    product.getCreatedAt()
             );
         }).collect(Collectors.toList());
     }
@@ -153,7 +155,8 @@ public class ProductQueryServiceImpl implements IProductQueryService {
                     product.getAvailable(),
                     userResource,
                     productCategory,
-                    location
+                    location,
+                    product.getCreatedAt()
             );
         }).collect(Collectors.toList());
     }
@@ -186,7 +189,8 @@ public class ProductQueryServiceImpl implements IProductQueryService {
                     product.getAvailable(),
                     userResource,
                     productCategory,
-                    location
+                    location,
+                    product.getCreatedAt()
             );
         }).collect(Collectors.toList());
     }
