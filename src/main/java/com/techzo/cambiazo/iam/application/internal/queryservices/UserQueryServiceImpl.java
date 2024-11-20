@@ -71,6 +71,6 @@ public class UserQueryServiceImpl implements UserQueryService {
     @Override
     public Optional<UserNameDto> handle(GetUserByEmailQuery query) {
         var result = userRepository.findByUsername(query.username());
-        return Optional.of(new UserNameDto(result.get().getName()));
+        return Optional.of(new UserNameDto(result.get().getName(), result.get().getIsGoogleAccount()));
     }
 }
