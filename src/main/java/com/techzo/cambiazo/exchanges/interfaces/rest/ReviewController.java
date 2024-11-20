@@ -81,7 +81,7 @@ public class ReviewController {
         }
     }
 
-    @GetMapping("/user-receptor/{userId}/exchange/{exchangeId}")
+    @GetMapping("/user-author/{userId}/exchange/{exchangeId}")
     public ResponseEntity<ExistReview> existsByUserAuthorIdAndExchangeId(@PathVariable Long userId, @PathVariable Long exchangeId) {
         try {
             var findReviewByUserAuthorIdAndExchangeId = new FindReviewByUserAuthorIdAndExchangeId(userId, exchangeId);
