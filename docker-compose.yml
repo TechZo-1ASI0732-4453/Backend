@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  cambiazo-db:
+    image: mysql:8
+    container_name: cambiazo-db
+    environment:
+      MYSQL_ROOT_PASSWORD: Cambiazo123!
+      MYSQL_DATABASE: cambiazo
+      MYSQL_USER: cambiazo_user
+      MYSQL_PASSWORD: Cambiazo123!
+    ports:
+      - "3307:3306"
+    volumes:
+      - cambiazo_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-pcambiazo123!"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - cambiazo-network
+
+  cambiazo-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cambiazo-backend
+    depends_on:
+      cambiazo-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://cambiazo-db:3306/cambiazo
+      SPRING_DATASOURCE_USERNAME: cambiazo_user
+      SPRING_DATASOURCE_PASSWORD: Cambiazo123!
+    ports:
+      - "8080:8080"
+    networks:
+      - cambiazo-network
+
+volumes:
+  cambiazo_mysql_data:
+
+networks:
+  cambiazo-network:
+    driver: bridge
