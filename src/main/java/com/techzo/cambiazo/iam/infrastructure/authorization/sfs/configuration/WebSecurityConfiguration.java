@@ -105,6 +105,7 @@ public class WebSecurityConfiguration {
                                 "/api/v2/authentication/sign-up",
                                 "/api/v2/authentication/**",
                                 "/api/v2/users/username/**",
+                                "/api/v2/users/username/{username}",
                                 "/api/v2/users/edit/password/**",
                                 "/api/v2/users/email/**",
                                 "/api/v2/products",
