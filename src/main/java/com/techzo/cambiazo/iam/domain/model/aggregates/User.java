@@ -38,8 +38,8 @@ public class User extends AuditableAbstractAggregateRoot<User> {
     @Size(max = 100)
     private String name;
 
-    @NotBlank
     @Size(max = 9)
+    @Column(nullable = true)
     private String phoneNumber;
 
     @Column(columnDefinition = "TEXT")
