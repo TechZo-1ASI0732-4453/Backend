@@ -25,6 +25,10 @@ jobs:
           distribution: 'microsoft'
 
       - name: Build with Maven
+        env:
+          DB_URL: jdbc:mysql://cambiazoserver.mysql.database.azure.com:3306/cambiazomovil?allowPublicKeyRetrieval=true&useSSL=true
+          DB_USERNAME: cambiazoserver
+          DB_PASSWORD: techZomovil2024
         run: mvn clean install
 
       - name: Upload artifact for deployment job
