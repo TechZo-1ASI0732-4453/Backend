@@ -26,7 +26,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
  * @version 1.0
  */
 @RestController
-@RequestMapping("/api/v2/account-number")
+@RequestMapping("/api/v2/donations/account-number")
 @Tag(name="Account Number", description="Account Number Management Endpoints")
 public class AccountNumberController {
 

@@ -108,6 +108,7 @@ public class WebSecurityConfiguration {
                                 "/api/v2/users/username/{username}",
                                 "/api/v2/users/edit/password/**",
                                 "/api/v2/users/email/**",
+                                "/api/v2/donations/**",
                                 "/api/v2/products",
                                 "/api/v2/products/{id}",
                                 "/v3/api-docs/**",
