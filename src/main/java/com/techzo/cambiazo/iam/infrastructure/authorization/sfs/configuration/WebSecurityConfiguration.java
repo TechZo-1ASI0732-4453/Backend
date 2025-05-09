@@ -111,6 +111,7 @@ public class WebSecurityConfiguration {
                                 "/api/v2/donations/**",
                                 "/api/v2/products",
                                 "/api/v2/products/{id}",
+                                "/api/v2/product-categories",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
