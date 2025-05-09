@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.donations.domain.model.aggregates;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import com.techzo.cambiazo.donations.domain.model.commands.CreateAccountNumberCommand;
@@ -32,10 +33,13 @@ public class AccountNumber extends AuditableAbstractAggregateRoot<AccountNumber>
     @NotNull(message = "Account Number is mandatory")
     private AccountNumberAccount account;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ong_id")
     @NotNull(message = "Ong is mandatory")
+    @JsonBackReference("ong-account-number")
     private Ong ongId;
+
+
 
     public AccountNumber() {}
 

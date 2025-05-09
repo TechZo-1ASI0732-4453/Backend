@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.donations.domain.model.aggregates;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import com.techzo.cambiazo.donations.domain.model.commands.CreateSocialNetworkCommand;
@@ -26,9 +27,10 @@ public class SocialNetwork extends AuditableAbstractAggregateRoot<SocialNetwork>
     @NotNull(message = "URL is mandatory")
     private SocialNetworkUrl url;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ong_id")
     @NotNull(message = "Ong is mandatory")
+    @JsonBackReference("ong-social-network")
     private Ong ongId;
 
     public SocialNetwork() {}

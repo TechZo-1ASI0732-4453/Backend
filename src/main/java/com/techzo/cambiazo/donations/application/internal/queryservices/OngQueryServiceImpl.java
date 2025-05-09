@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.donations.application.internal.queryservices;
 
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import com.techzo.cambiazo.donations.domain.model.aggregates.Ong;
 import com.techzo.cambiazo.donations.domain.model.entities.CategoryOng;
@@ -10,11 +11,13 @@ import com.techzo.cambiazo.donations.domain.model.queries.GetOngsByCategoryOngId
 import com.techzo.cambiazo.donations.domain.services.OngQueryService;
 import com.techzo.cambiazo.donations.infrastructure.persistence.jpa.CategoryOngRepository;
 import com.techzo.cambiazo.donations.infrastructure.persistence.jpa.OngRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional(readOnly = true)
 public class OngQueryServiceImpl implements OngQueryService {
     private final OngRepository ongRepository;
     private final CategoryOngRepository categoryOngRepository;
@@ -45,5 +48,21 @@ public class OngQueryServiceImpl implements OngQueryService {
     public List<Ong>handle(GetOngByLettersQuery query) {
         return ongRepository.findByNameContaining(query.letters());
     }
+
+    @Override
+    public Optional<Ong> getOngWithRelations(Long id) {
+        Optional<Ong> ongBase = ongRepository.findOneWithRelations(id);
+        if (ongBase.isPresent()) {
+            Ong ong = ongBase.get();
+            // Inicializar las colecciones
+            Hibernate.initialize(ong.getProjects());
+            Hibernate.initialize(ong.getAccountNumbers());
+            Hibernate.initialize(ong.getSocialNetworks());
+            return Optional.of(ong);
+        }
+        return Optional.empty();
+    }
+
+
 
 }

@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.donations.domain.model.aggregates;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -26,9 +27,10 @@ public class Project extends AuditableAbstractAggregateRoot<Project> {
     @Getter
     private String description;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ong_id")
     @NotNull(message = "Ong is mandatory")
+    @JsonBackReference("ong-project")
     private Ong ongId;
 
     public Project() {}

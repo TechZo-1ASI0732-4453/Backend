@@ -19,5 +19,6 @@ public interface OngQueryService {
 
     List<Ong>handle(GetOngByLettersQuery query);
 
+    Optional<Ong> getOngWithRelations(Long id);
 
 }

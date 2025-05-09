@@ -1,14 +1,18 @@
 package com.techzo.cambiazo.donations.domain.model.aggregates;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import com.techzo.cambiazo.donations.domain.model.commands.CreateOngCommand;
 import com.techzo.cambiazo.donations.domain.model.entities.CategoryOng;
 import com.techzo.cambiazo.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Represents an NGO (Non-Governmental Organization) entity.
@@ -74,10 +78,38 @@ public class Ong extends AuditableAbstractAggregateRoot<Ong> {
     @Getter
     private String schedule;
 
-    @ManyToOne
+
+    /**
+     * Get the ID of the category of the NGO.
+     *
+     * @return The ID of the category.
+     */
+    @Getter
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_ong_id")
     @NotNull(message = "CategoryOngId is mandatory")
+    @JsonBackReference("category-w-ong")
     private CategoryOng categoryOngId;
+
+    @Getter
+    @OneToMany(mappedBy = "ongId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("ong-projects")
+    private Set<Project> projects = new HashSet<>();
+
+
+    @Getter
+    @OneToMany(mappedBy = "ongId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("ong-account-numbers")
+    private Set<AccountNumber> accountNumbers = new HashSet<>();
+
+
+    @Getter
+    @OneToMany(mappedBy = "ongId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("ong-social-network")
+    private Set<SocialNetwork> socialNetworks = new HashSet<>();
+
+
+
 
     public Ong(CreateOngCommand command, CategoryOng categoryOng) {
         this.categoryOngId = categoryOng;
@@ -129,12 +161,6 @@ public class Ong extends AuditableAbstractAggregateRoot<Ong> {
         return this;
     }
 
-    /**
-     * Get the ID of the category of the NGO.
-     *
-     * @return The ID of the category.
-     */
-    public Long getCategoryOngId() {
-        return categoryOngId.getId();
-    }
+
+
 }

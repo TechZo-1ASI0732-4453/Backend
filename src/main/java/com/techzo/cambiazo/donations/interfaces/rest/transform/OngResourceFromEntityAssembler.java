@@ -17,7 +17,7 @@ public class OngResourceFromEntityAssembler {
                 entity.getPhone(),
                 entity.getLogo(),
                 entity.getWebsite(),
-                entity.getCategoryOngId(),
+                entity.getCategoryOngId().getCategoryId(),
                 entity.getSchedule()
         );
     }

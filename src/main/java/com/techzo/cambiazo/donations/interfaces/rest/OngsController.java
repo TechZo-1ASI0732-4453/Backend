@@ -1,5 +1,7 @@
 package com.techzo.cambiazo.donations.interfaces.rest;
 
+import com.techzo.cambiazo.donations.domain.model.aggregates.Ong;
+import com.techzo.cambiazo.donations.domain.model.dtos.OngResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
@@ -181,4 +183,34 @@ public class OngsController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @GetMapping("/{id}/details")
+    public ResponseEntity<OngResponse> getOngWithRelations(@PathVariable Long id) {
+        return ongQueryService.getOngWithRelations(id)
+                .map(ong -> ResponseEntity.ok(toResponse(ong)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    private OngResponse toResponse(Ong ong) {
+        return new OngResponse(
+                ong.getId(),
+                ong.getName(),
+                ong.getType(),
+                ong.getAboutUs(),
+                ong.getMissionAndVision(),
+                ong.getSupportForm(),
+                ong.getAddress(),
+                ong.getEmail(),
+                ong.getPhone(),
+                ong.getLogo(),
+                ong.getWebsite(),
+                ong.getSchedule(),
+                ong.getCategoryOngId(),
+                ong.getProjects(),
+                ong.getAccountNumbers(),
+                ong.getSocialNetworks()
+        );
+    }
+
+
 }
