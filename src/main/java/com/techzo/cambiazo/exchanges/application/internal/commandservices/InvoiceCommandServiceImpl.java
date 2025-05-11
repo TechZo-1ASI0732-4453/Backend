@@ -1,5 +1,9 @@
 package com.techzo.cambiazo.exchanges.application.internal.commandservices;
 
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
+import com.google.cloud.storage.BlobInfo;
+import com.google.cloud.storage.Storage;
 import com.lowagie.text.*;
 import com.lowagie.text.Font;
 import com.lowagie.text.Image;
@@ -14,15 +18,15 @@ import com.techzo.cambiazo.exchanges.domain.services.IInvoiceCommandService;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IInvoiceRepository;
 import com.techzo.cambiazo.iam.domain.model.aggregates.User;
 import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.UserRepository;
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import java.io.ByteArrayOutputStream;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,11 +44,24 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
     private final IInvoiceRepository invoiceRepository;
     private final UserRepository userRepository;
     private final JavaMailSender mailSender;
+    private final Storage           storage;
+    @Value("${firebase.bucket.name}")
+    private String bucket;
 
-    public InvoiceCommandServiceImpl(IInvoiceRepository invoiceRepository, UserRepository userRepository, JavaMailSender mailSender) {
+    @PostConstruct
+    void logBucket() {
+        System.out.println("### BUCKET INYECTADO => " + bucket);
+    }
+
+
+    public InvoiceCommandServiceImpl(IInvoiceRepository invoiceRepository,
+                                     UserRepository userRepository,
+                                     JavaMailSender mailSender,
+                                     Storage storage) {
         this.invoiceRepository = invoiceRepository;
         this.userRepository = userRepository;
         this.mailSender = mailSender;
+        this.storage = storage;
     }
 
     @Override
@@ -69,13 +86,22 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
         Invoice invoice = new Invoice(invoiceNumber, command.totalAmount(),
                 command.concept(), filePath, user);
         try {
-            generateInvoicePdf(invoice);
-        } catch (Exception e) {
-            throw new RuntimeException("Error al generar la boleta PDF", e);
-        }
+            byte[] pdf = buildPdfBytes(invoice);
+            String objectName = "invoices/" + invoiceNumber + ".pdf";
+            storage.create(
+                    BlobInfo.newBuilder(bucket, objectName)
+                            .setContentType("application/pdf")
+                            .build(),
+                    pdf
+            );
+            String gsPath = "gs://" + bucket + "/" + objectName;
+            invoice.setFilePath(gsPath);
 
-        invoiceRepository.save(invoice);
-        sendInvoiceEmail(user.getUsername(), invoice);
+            invoiceRepository.save(invoice);
+            sendInvoiceEmail(user.getUsername(), invoice, pdf);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al generar o subir la boleta", e);
+        }
 
         return Optional.of(invoice);
     }
@@ -86,15 +112,11 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
     private static final Font  VALUE = FontFactory.getFont(FontFactory.HELVETICA,      12, BLACK);
     private static final Font  FOOT  = FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 11, Color.GRAY);
 
-    private void generateInvoicePdf(Invoice invoice) throws IOException, DocumentException {
-
-        File dir = new File("invoices");
-        if (!dir.exists()) dir.mkdirs();
-
+    private byte[] buildPdfBytes(Invoice invoice) throws IOException, DocumentException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
         Document doc = new Document(PageSize.A4, 50, 50, 90, 50);
-        PdfWriter writer = PdfWriter.getInstance(doc, new FileOutputStream(invoice.getFilePath()));
+        PdfWriter.getInstance(doc, out);
         doc.open();
-
         Image logo = Image.getInstance("src/main/resources/static/images/cambiazo_logo.png");
         logo.scaleToFit(140, 70);
 
@@ -152,7 +174,7 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
         doc.add(foot);
 
         doc.close();
-        writer.close();
+        return out.toByteArray();
     }
 
     private PdfPTable buildDetailTable(Invoice inv) throws DocumentException {
@@ -183,7 +205,7 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
         t.addCell(v);
     }
 
-    private void sendInvoiceEmail(String to, Invoice invoice) {
+    private void sendInvoiceEmail(String to, Invoice invoice, byte[] pdf) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -225,6 +247,8 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
             );
 
             helper.setText(html, true);
+            helper.addAttachment(invoice.getInvoiceNumber() + ".pdf",
+                    new ByteArrayResource(pdf));
 
             File file = new File(invoice.getFilePath());
             if (file.exists()) {
