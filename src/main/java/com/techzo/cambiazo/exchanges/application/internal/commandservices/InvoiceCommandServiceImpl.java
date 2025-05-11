@@ -45,23 +45,18 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
     private final UserRepository userRepository;
     private final JavaMailSender mailSender;
     private final Storage           storage;
-    @Value("${firebase.bucket.name}")
     private String bucket;
-
-    @PostConstruct
-    void logBucket() {
-        System.out.println("### BUCKET INYECTADO => " + bucket);
-    }
-
 
     public InvoiceCommandServiceImpl(IInvoiceRepository invoiceRepository,
                                      UserRepository userRepository,
                                      JavaMailSender mailSender,
-                                     Storage storage) {
+                                     Storage storage,
+                                     @Value("${firebase.bucket.name}") String bucket) {
         this.invoiceRepository = invoiceRepository;
         this.userRepository = userRepository;
         this.mailSender = mailSender;
         this.storage = storage;
+        this.bucket = bucket;
     }
 
     @Override
