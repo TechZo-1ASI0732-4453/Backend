@@ -65,7 +65,7 @@ public class SubscriptionCommandServiceImpl implements ISubscriptionCommandServi
             Subscription subscription = subscriptionRepository.findById(command.id())
                     .orElseThrow(() -> new IllegalArgumentException("Subscription not found"));
 
-            Plan plan = planRepository.findById(subscription.getPlanId())
+            Plan plan = planRepository.findById(command.planId())
                     .orElseThrow(() -> new IllegalArgumentException("Plan not found"));
 
             User user = userRepository.findById(subscription.getUserId())
