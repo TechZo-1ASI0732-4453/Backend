@@ -1,0 +1,226 @@
+package com.techzo.cambiazo.exchanges.application.internal.commandservices;
+
+import com.lowagie.text.*;
+import com.lowagie.text.Font;
+import com.lowagie.text.Image;
+import com.lowagie.text.Rectangle;
+import com.lowagie.text.pdf.PdfContentByte;
+import com.lowagie.text.pdf.PdfPCell;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
+import com.techzo.cambiazo.exchanges.domain.model.commands.CreateInvoiceCommand;
+import com.techzo.cambiazo.exchanges.domain.model.entities.Invoice;
+import com.techzo.cambiazo.exchanges.domain.services.IInvoiceCommandService;
+import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.IInvoiceRepository;
+import com.techzo.cambiazo.iam.domain.model.aggregates.User;
+import com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories.UserRepository;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
+
+import java.awt.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import static java.awt.Color.BLACK;
+
+@Service
+public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
+
+    private final IInvoiceRepository invoiceRepository;
+    private final UserRepository userRepository;
+    private final JavaMailSender mailSender;
+
+    public InvoiceCommandServiceImpl(IInvoiceRepository invoiceRepository, UserRepository userRepository, JavaMailSender mailSender) {
+        this.invoiceRepository = invoiceRepository;
+        this.userRepository = userRepository;
+        this.mailSender = mailSender;
+    }
+
+    @Override
+    public Optional<Invoice> handle(CreateInvoiceCommand command) {
+        User user = userRepository.findById(command.userId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        String invoiceNumber = "INV-" + java.time.LocalDate.now() + "-" + System.currentTimeMillis();
+
+        String filePath = "invoices/" + invoiceNumber + ".pdf";
+
+        Invoice invoice = new Invoice(invoiceNumber, command.totalAmount(), command.concept(), filePath, user);
+        try {
+            generateInvoicePdf(invoice);
+        } catch (IOException | DocumentException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error al generar la boleta", e);
+        }
+        invoiceRepository.save(invoice);
+        sendInvoiceEmail(user.getUsername(), invoice);
+
+        return Optional.of(invoice);
+    }
+
+    private static final Color LIGHT = new Color(250, 250, 250);
+    private static final Font  TITLE = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 26, BLACK);
+    private static final Font  LABEL = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, Color.DARK_GRAY);
+    private static final Font  VALUE = FontFactory.getFont(FontFactory.HELVETICA,      12, BLACK);
+    private static final Font  FOOT  = FontFactory.getFont(FontFactory.HELVETICA_OBLIQUE, 11, Color.GRAY);
+
+    private void generateInvoicePdf(Invoice invoice) throws IOException, DocumentException {
+
+        File dir = new File("invoices");
+        if (!dir.exists()) dir.mkdirs();
+
+        Document doc = new Document(PageSize.A4, 50, 50, 90, 50);
+        PdfWriter writer = PdfWriter.getInstance(doc, new FileOutputStream(invoice.getFilePath()));
+        doc.open();
+
+        Image logo = Image.getInstance("src/main/resources/static/images/cambiazo_logo.png");
+        logo.scaleToFit(140, 70);
+
+        Paragraph companyInfo = new Paragraph("""
+    CambiaZo Perú S.A.C.
+    RUC: 20555555555
+    Av.Los Helechos 123, Lima
+    """, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 13));
+
+        PdfPTable header = new PdfPTable(2);
+        header.setWidthPercentage(100);
+        header.setWidths(new float[]{2, 5});
+
+        PdfPCell logoCell = new PdfPCell(logo, false);
+        logoCell.setBorder(PdfPCell.NO_BORDER);
+        logoCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        logoCell.setVerticalAlignment(Element.ALIGN_TOP);
+
+        PdfPCell infoCell = new PdfPCell();
+        infoCell.addElement(companyInfo);
+        infoCell.setBorder(PdfPCell.NO_BORDER);
+        infoCell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+
+        header.addCell(infoCell);
+        header.addCell(logoCell);
+        doc.add(header);
+
+        Paragraph title = new Paragraph("BOLETA DE PAGO", TITLE);
+        title.setAlignment(Element.ALIGN_CENTER);
+        title.setSpacingBefore(25);
+        title.setSpacingAfter(25);
+        doc.add(title);
+
+        PdfPTable wrapper = new PdfPTable(1);
+        wrapper.setWidthPercentage(100);
+        PdfPCell shadow = new PdfPCell();
+        shadow.setBorder(PdfPCell.NO_BORDER);
+        shadow.setCellEvent((cell, position, canvases) -> {
+            Rectangle r = new Rectangle(position.getLeft()-2, position.getBottom()-2,
+                    position.getRight()+2, position.getTop()+2);
+            PdfContentByte cb = canvases[PdfPTable.BACKGROUNDCANVAS];
+            cb.setColorFill(new Color(230, 230, 230));
+            cb.roundRectangle(r.getLeft(), r.getBottom(), r.getWidth(), r.getHeight(), 6);
+            cb.fill();
+        });
+        shadow.addElement(buildDetailTable(invoice));
+        wrapper.addCell(shadow);
+        doc.add(wrapper);
+
+        Paragraph foot = new Paragraph(
+                "Gracias por confiar en CambiaZo. Conserve esta boleta como comprobante de su pago.",
+                FOOT);
+        foot.setAlignment(Element.ALIGN_CENTER);
+        foot.setSpacingBefore(30);
+        doc.add(foot);
+
+        doc.close();
+        writer.close();
+    }
+
+    private PdfPTable buildDetailTable(Invoice inv) throws DocumentException {
+        PdfPTable t = new PdfPTable(2);
+        t.setWidths(new float[]{1.6f, 3.4f});
+        t.setWidthPercentage(100);
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd 'de' MMMM yyyy – HH:mm")
+                .withLocale(new Locale("es","PE"));
+        addRow(t,"Cliente:",  inv.getUser().getName());
+        addRow(t,"Número:",   inv.getInvoiceNumber());
+        addRow(t,"Emitido:",  inv.getIssuedAt().format(fmt));
+        addRow(t,"Monto:",    "$ " + String.format(Locale.US,"%,.2f", inv.getAmount()));
+        addRow(t,"Concepto:", inv.getDescription());
+        return t;
+    }
+
+    private void addRow(PdfPTable t, String label, String value) {
+        boolean zebra = (t.getRows().size() % 2) == 0;
+        Color bg = zebra ? LIGHT : Color.WHITE;
+        PdfPCell l = new PdfPCell(new Phrase(label, LABEL));
+        PdfPCell v = new PdfPCell(new Phrase(value, VALUE));
+        Stream.of(l,v).forEach(c -> {
+            c.setBorder(PdfPCell.NO_BORDER);
+            c.setBackgroundColor(bg);
+            c.setPadding(8);
+        });
+        t.addCell(l);
+        t.addCell(v);
+    }
+
+    private void sendInvoiceEmail(String to, Invoice invoice) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(to);
+            helper.setSubject("Gracias por tu suscripción a CambiaZo");
+
+            String html = """
+            <html>
+            <body>
+              <p>Hola %s,</p>
+              <p>¡Muchas gracias por tu suscripción a <strong>CambiaZo</strong>!</p>
+              <p>Nos complace darte la bienvenida a nuestra comunidad de usuarios. A partir de hoy podrás disfrutar de:</p>
+              <ul>
+                <li>Acceso prioritario a nuevas funcionalidades.</li>
+                <li>Soporte dedicado 24/7 para resolver cualquier duda.</li>
+                <li>Promociones y descuentos exclusivos para suscriptores.</li>
+              </ul>
+              <p>Tu boleta de pago está adjunta en este correo. Si necesitas descargarla nuevamente, puedes hacerlo desde tu panel de usuario en <a href="https://app.cambiazo.com/invoices">CambiaZo</a>.</p>
+              <p>Detalles de tu suscripción:</p>
+              <table cellpadding="6" cellspacing="0" border="1">
+                <tr><td><strong>Número de boleta</strong></td><td>%s</td></tr>
+                <tr><td><strong>Fecha de emisión</strong></td><td>%s</td></tr>
+                <tr><td><strong>Monto</strong></td><td>$ %,.2f</td></tr>
+                <tr><td><strong>Concepto</strong></td><td>%s</td></tr>
+              </table>
+              <p>Si tienes alguna pregunta o necesitas asistencia adicional, no dudes en contactarnos respondiendo a este correo o a través de nuestro chat en línea.</p>
+              <p>¡Gracias por confiar en CambiaZo!</p>
+              <p>Saludos cordiales,<br/>
+                 El equipo de CambiaZo</p>
+            </body>
+            </html>
+            """.formatted(
+                    invoice.getUser().getName(),
+                    invoice.getInvoiceNumber(),
+                    invoice.getIssuedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+                    invoice.getAmount(),
+                    invoice.getDescription()
+            );
+
+            helper.setText(html, true);
+
+            File file = new File(invoice.getFilePath());
+            if (file.exists()) {
+                helper.addAttachment(file.getName(), file);
+            }
+
+            mailSender.send(message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+}
