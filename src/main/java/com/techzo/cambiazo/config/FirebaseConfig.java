@@ -8,8 +8,8 @@ import com.google.cloud.storage.StorageOptions;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 @Configuration
 public class FirebaseConfig {
@@ -22,15 +22,22 @@ public class FirebaseConfig {
 
     @Bean
     public Storage firebaseStorage() throws Exception {
-        FileInputStream serviceAccount = new FileInputStream(keyPath);
+        InputStream serviceAccount = getClass().getClassLoader().getResourceAsStream("config/firebase-key.json");
+
+        if (serviceAccount == null) {
+            throw new FileNotFoundException("No se encontró el archivo firebase-key.json en resources/config");
+        }
+
         var credentials = ServiceAccountCredentials.fromStream(serviceAccount);
         var options = FirebaseOptions.builder()
                 .setCredentials(credentials)
                 .setStorageBucket(bucket)
                 .build();
+
         if (FirebaseApp.getApps().isEmpty()) {
             FirebaseApp.initializeApp(options);
         }
+
         return StorageOptions.newBuilder()
                 .setCredentials(credentials)
                 .build()
