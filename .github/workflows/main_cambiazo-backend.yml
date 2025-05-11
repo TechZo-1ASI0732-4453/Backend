@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -23,16 +23,13 @@ jobs:
         with:
           java-version: '21'
           distribution: 'microsoft'
-      - name: Create firebase-key.json from secret
-        run: |
-          mkdir -p src/main/resources/config
-          echo "${{ secrets.FIREBASE_KEY_JSON }}" > src/main/resources/config/firebase-key.json
 
       - name: Build with Maven
         env:
           DB_URL: jdbc:mysql://cambiazoserver.mysql.database.azure.com:3306/cambiazomovil?allowPublicKeyRetrieval=true&useSSL=true
           DB_USERNAME: cambiazoserver
           DB_PASSWORD: techZomovil2024
+          FIREBASE_CREDENTIALS_JSON: ${{ secrets.FIREBASE_CREDENTIALS_JSON }}
         run: mvn clean install
 
       - name: Upload artifact for deployment job
@@ -48,15 +45,15 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
-  
+      id-token: write
+      contents: read
+
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: java-app
-      
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -71,4 +68,3 @@ jobs:
           app-name: 'cambiazo-backend'
           slot-name: 'Production'
           package: '*.jar'
-          
