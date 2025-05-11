@@ -24,6 +24,9 @@ import java.awt.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Optional;
@@ -47,19 +50,30 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
     @Override
     public Optional<Invoice> handle(CreateInvoiceCommand command) {
         User user = userRepository.findById(command.userId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-        String invoiceNumber = "INV-" + java.time.LocalDate.now() + "-" + System.currentTimeMillis();
+        String invoiceNumber = "INV-"
+                + LocalDate.now().format(DateTimeFormatter.ISO_DATE)
+                + "-" + System.currentTimeMillis();
 
-        String filePath = "invoices/" + invoiceNumber + ".pdf";
+        Path tempDir = Path.of(System.getProperty("java.io.tmpdir"), "cambiazo", "invoices");
+        try {
+            Files.createDirectories(tempDir);
+        } catch (Exception e) {
+            throw new RuntimeException("No se pudo crear el directorio de boletas", e);
+        }
 
-        Invoice invoice = new Invoice(invoiceNumber, command.totalAmount(), command.concept(), filePath, user);
+        String pdfFilename = invoiceNumber + ".pdf";
+        String filePath = tempDir.resolve(pdfFilename).toString();
+
+        Invoice invoice = new Invoice(invoiceNumber, command.totalAmount(),
+                command.concept(), filePath, user);
         try {
             generateInvoicePdf(invoice);
-        } catch (IOException | DocumentException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error al generar la boleta", e);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al generar la boleta PDF", e);
         }
+
         invoiceRepository.save(invoice);
         sendInvoiceEmail(user.getUsername(), invoice);
 
