@@ -112,7 +112,7 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
         Document doc = new Document(PageSize.A4, 50, 50, 90, 50);
         PdfWriter.getInstance(doc, out);
         doc.open();
-        Image logo = Image.getInstance("src/main/resources/static/images/cambiazo_logo.png");
+        Image logo = Image.getInstance("https://cambiazo-site.netlify.app/assets/logo/cambiazo_logo.png");
         logo.scaleToFit(140, 70);
 
         Paragraph companyInfo = new Paragraph("""
