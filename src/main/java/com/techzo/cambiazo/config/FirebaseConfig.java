@@ -16,9 +16,6 @@ import java.util.Base64;
 @Configuration
 public class FirebaseConfig {
 
-    @Value("${firebase.credentials.json}")
-    private String firebaseCredentialsJson;
-
     @Value("${firebase.bucket.name}")
     private String bucket;
 
@@ -46,5 +43,5 @@ public class FirebaseConfig {
                 .setCredentials(credentials)
                 .build()
                 .getService();
-    }|
+    }
 }
