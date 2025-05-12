@@ -65,9 +65,14 @@ public class ExchangeCommandServiceImpl implements IExchangeCommandService {
                 productRepository.save(productOwn);
                 productRepository.save(productChange);
             }
+            //
 
-            exchangeRepository.updateExchangeStatusToRejectedByProductOwnExcept(productOwn, exchange.getId());
-            exchangeRepository.updateExchangeStatusToRejectedByProductChangeExcept(productChange, exchange.getId());
+            exchangeRepository.updateExchangeStatusToRejectedByProductOwnExcept(
+                    productOwn.getId(), exchange.getId());
+
+            exchangeRepository.updateExchangeStatusToRejectedByProductChangeExcept(
+                    productChange.getId(), exchange.getId());
+
 
             return Optional.of(updatedExchange);
         } catch (Exception e) {
