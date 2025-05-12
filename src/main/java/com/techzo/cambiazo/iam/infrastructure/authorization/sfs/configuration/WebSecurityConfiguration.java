@@ -101,25 +101,19 @@ public class WebSecurityConfiguration {
                 .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(unauthorizedRequestHandler))
                 .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                        .requestMatchers("/api/v2/users/**").hasAuthority("GET")
+                        .requestMatchers("/api/v2/products/**").hasAuthority("GET")
+                        .requestMatchers("/api/v2/plans/**").hasAuthority("GET")
                         .requestMatchers(
                                 "/api/v2/authentication/sign-up",
                                 "/api/v2/authentication/**",
-                                "/api/v2/users/username/**",
-                                "/api/v2/users/username/{username}",
-                                "/api/v2/users/edit/password/**",
-                                "/api/v2/users/email/**",
                                 "/api/v2/donations/**",
-                                "/api/v2/products",
-                                "/api/v2/products/{id}",
-                                "/api/v2/product-categories",
                                 "/api/v2/countries",
                                 "/api/v2/countries/**",
                                 "/api/v2/departments",
                                 "/api/v2/departments/**",
                                 "/api/v2/districts",
                                 "/api/v2/districts/**",
-                                "/api/v2/plans",
-                                "/api/v2/plans/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",

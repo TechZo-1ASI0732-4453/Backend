@@ -117,7 +117,6 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
 
         Paragraph companyInfo = new Paragraph("""
     CambiaZo Perú S.A.C.
-    RUC: 20555555555
     Av.Los Helechos 123, Lima
     """, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 13));
 
@@ -217,9 +216,8 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
               <ul>
                 <li>Acceso prioritario a nuevas funcionalidades.</li>
                 <li>Soporte dedicado 24/7 para resolver cualquier duda.</li>
-                <li>Promociones y descuentos exclusivos para suscriptores.</li>
               </ul>
-              <p>Tu boleta de pago está adjunta en este correo. Si necesitas descargarla nuevamente, puedes hacerlo desde tu panel de usuario en <a href="https://app.cambiazo.com/invoices">CambiaZo</a>.</p>
+              <p>Visita ahora para probar tus beneficios <a href="https://cambia-zo.netlify.app/">CambiaZo</a>.</p>
               <p>Detalles de tu suscripción:</p>
               <table cellpadding="6" cellspacing="0" border="1">
                 <tr><td><strong>Número de boleta</strong></td><td>%s</td></tr>
