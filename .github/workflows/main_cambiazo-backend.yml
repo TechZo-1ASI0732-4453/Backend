@@ -24,11 +24,6 @@ jobs:
           java-version: '21'
           distribution: 'microsoft'
 
-      - name: Create firebase-key.json from secret
-        run: |
-          mkdir -p src/main/resources/config
-          echo "${{ secrets.FIREBASE_KEY_JSON }}" > src/main/resources/config/firebase-key.json
-
       - name: Build with Maven
         env:
           DB_URL: jdbc:mysql://cambiazoserver.mysql.database.azure.com:3306/cambiazomovil?allowPublicKeyRetrieval=true&useSSL=true
