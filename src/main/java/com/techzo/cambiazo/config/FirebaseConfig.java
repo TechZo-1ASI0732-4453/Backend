@@ -24,7 +24,12 @@ public class FirebaseConfig {
 
     @Bean
     public Storage firebaseStorage() throws Exception {
-        byte[] decodedBytes = Base64.getDecoder().decode(firebaseCredentialsJson);
+        String base64Json = System.getenv("FIREBASE_KEY_JSON");
+        if (base64Json == null || base64Json.isBlank()) {
+            throw new IllegalStateException("FIREBASE_KEY_JSON environment variable is not set.");
+        }
+
+        byte[] decodedBytes = Base64.getDecoder().decode(base64Json);
         InputStream serviceAccount = new ByteArrayInputStream(decodedBytes);
 
         var credentials = ServiceAccountCredentials.fromStream(serviceAccount);
@@ -41,5 +46,5 @@ public class FirebaseConfig {
                 .setCredentials(credentials)
                 .build()
                 .getService();
-    }
+    }|
 }
