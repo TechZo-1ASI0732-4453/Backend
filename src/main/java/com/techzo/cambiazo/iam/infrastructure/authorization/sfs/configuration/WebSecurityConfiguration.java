@@ -104,16 +104,14 @@ public class WebSecurityConfiguration {
                         .requestMatchers("/api/v2/users/**").hasAuthority("GET")
                         .requestMatchers("/api/v2/products/**").hasAuthority("GET")
                         .requestMatchers("/api/v2/plans/**").hasAuthority("GET")
+                        .requestMatchers("/api/v2/countries/**").hasAuthority("GET")
+                        .requestMatchers("/api/v2/departments/**").hasAuthority("GET")
+                        .requestMatchers("/api/v2/districts/**").hasAuthority("GET")
+                        .requestMatchers("/api/v2/donations/**").hasAuthority("GET")
+
                         .requestMatchers(
                                 "/api/v2/authentication/sign-up",
                                 "/api/v2/authentication/**",
-                                "/api/v2/donations/**",
-                                "/api/v2/countries",
-                                "/api/v2/countries/**",
-                                "/api/v2/departments",
-                                "/api/v2/departments/**",
-                                "/api/v2/districts",
-                                "/api/v2/districts/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
