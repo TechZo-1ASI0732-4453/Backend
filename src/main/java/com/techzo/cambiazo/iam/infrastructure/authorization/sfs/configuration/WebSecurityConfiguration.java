@@ -6,7 +6,6 @@ import com.techzo.cambiazo.iam.infrastructure.tokens.jwt.BearerTokenService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -89,41 +88,42 @@ public class WebSecurityConfiguration {
      * @param http The http security
      * @return The security filter chain
      */
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors(configurer -> configurer.configurationSource(request -> {
-                    var cors = new CorsConfiguration();
-                    cors.setAllowedOrigins(List.of("*"));
-                    cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-                    cors.setAllowedHeaders(List.of("*"));
-                    return cors;
-                }))
-                .csrf(csrfConfigurer -> csrfConfigurer.disable())
+        http.cors(configurer -> configurer.configurationSource(request  -> {
+            var cors = new CorsConfiguration();
+            cors.setAllowedOrigins(List.of("*"));
+            cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+            cors.setAllowedHeaders(List.of("*"));
+            return cors;
+        }));
+        http.csrf(csrfConfigurer -> csrfConfigurer.disable())
                 .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(unauthorizedRequestHandler))
                 .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers(HttpMethod.GET, "/api/v2/countries/**").hasAuthority("ROLE_USER")
-                        .requestMatchers(HttpMethod.GET, "/api/v2/users/**").hasAuthority("ROLE_USER")
-                        .requestMatchers(HttpMethod.GET, "/api/v2/products/**").hasAuthority("ROLE_USER")
-                        .requestMatchers(HttpMethod.GET, "/api/v2/plans/**").hasAuthority("ROLE_USER")
-                        .requestMatchers(HttpMethod.GET, "/api/v2/departments/**").hasAuthority("ROLE_USER")
-                        .requestMatchers(HttpMethod.GET, "/api/v2/districts/**").hasAuthority("ROLE_USER")
-                        .requestMatchers(HttpMethod.GET, "/api/v2/donations/**").hasAuthority("ROLE_USER")
+
                         .requestMatchers(
                                 "/api/v2/authentication/sign-up",
                                 "/api/v2/authentication/**",
+                                "/api/v2/donations/**",
+                                "/api/v2/countries",
+                                "/api/v2/countries/**",
+                                "/api/v2/departments",
+                                "/api/v2/departments/**",
+                                "/api/v2/districts",
+                                "/api/v2/users",
+                                "/api/v2/users/**",
+                                "/api/v2/districts/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
-                                "/swagger-ui/**",
-                                "/swagger-resources/**",
-                                "/webjars/**"
-                        ).permitAll()
+                                "/swagger-ui/**"
+                                ).permitAll()
                         .anyRequest().authenticated());
-
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authorizationRequestFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
-    }
 
+    }
 
     /**
      * This is the constructor of the class.
