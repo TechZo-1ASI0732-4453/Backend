@@ -112,6 +112,8 @@ public class WebSecurityConfiguration {
                                 "/api/v2/departments",
                                 "/api/v2/products/**",
                                 "/api/v2/products",
+                                "/api/v2/products-categories",
+                                "/api/v2/products-categories/**",
                                 "/api/v2/plans/**",
                                 "/api/v2/plans",
                                 "/api/v2/departments/**",
