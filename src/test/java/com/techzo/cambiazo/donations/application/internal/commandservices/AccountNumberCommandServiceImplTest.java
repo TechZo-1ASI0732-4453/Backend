@@ -21,7 +21,7 @@ class AccountNumberCommandServiceImplTest {
     private final AccountNumberCommandServiceImpl service = new AccountNumberCommandServiceImpl(accountNumberRepository, ongRepository);
 
     @Test
-    void handle_ShouldCreateAccountNumber_WhenValidCommand() {
+    void testShouldCreateAccountNumber_WhenValidCommand() {
         // Arrange
         var command = new CreateAccountNumberCommand("987654321", "Test Name", "123456789", Long.valueOf("987654321"));
         var ong = mock(Ong.class);
@@ -37,7 +37,7 @@ class AccountNumberCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowOngNotFoundException_WhenOngDoesNotExist() {
+    void testShouldThrowOngNotFoundException_WhenOngDoesNotExist() {
         // Arrange
         var command = new CreateAccountNumberCommand("1", "Test Name", "123456789", Long.valueOf("987654321"));
         when(ongRepository.findById(1L)).thenReturn(Optional.empty());

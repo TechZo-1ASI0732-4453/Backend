@@ -31,7 +31,7 @@ class DistrictCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldCreateDistrict_WhenValidCommand() {
+    void testShouldCreateDistrict_WhenValidCommand() {
         // Arrange
         var command = new CreateDistrictCommand("Palermo", 1L);
         var department = new Department();
@@ -55,7 +55,7 @@ class DistrictCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenDepartmentNotFound() {
+    void testShouldThrowException_WhenDepartmentNotFound() {
         // Arrange
         var command = new CreateDistrictCommand("Palermo", 1L);
 
@@ -70,7 +70,7 @@ class DistrictCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenDistrictAlreadyExists() {
+    void testShouldThrowException_WhenDistrictAlreadyExists() {
         // Arrange
         var command = new CreateDistrictCommand("Palermo", 1L);
         var department = new Department();

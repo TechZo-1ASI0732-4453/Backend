@@ -27,7 +27,7 @@ class CategoryOngCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldCreateCategoryOng_WhenValidCommand() {
+    void testShouldCreateCategoryOng_WhenValidCommand() {
         var command = new CreateCategoryOngCommand("Education");
         var categoryOng = new CategoryOng(command);
 
@@ -43,7 +43,7 @@ class CategoryOngCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenCategoryNameAlreadyExists() {
+    void testShouldThrowException_WhenCategoryNameAlreadyExists() {
         var command = new CreateCategoryOngCommand("Education");
 
         when(categoryOngRepository.existsByName(command.name())).thenReturn(true);
@@ -54,7 +54,7 @@ class CategoryOngCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldUpdateCategoryOng_WhenValidCommand() {
+    void testShouldUpdateCategoryOng_WhenValidCommand() {
         var command = new UpdateCategoryOngCommand(1L, "Health");
         var existingCategoryOng = new CategoryOng("Education");
 
@@ -72,7 +72,7 @@ class CategoryOngCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenUpdatingToExistingCategoryName() {
+    void testShouldThrowException_WhenUpdatingToExistingCategoryName() {
         var command = new UpdateCategoryOngCommand(1L, "Health");
 
         when(categoryOngRepository.existsByNameAndIdIsNot(command.name(), command.id())).thenReturn(true);
@@ -83,7 +83,7 @@ class CategoryOngCommandServiceImplTest {
     }
 
     @Test
-    void handleDeleteCategoryOng_ShouldReturnTrue_WhenCategoryExists() {
+    void testHandleDeleteCategoryOng_ShouldReturnTrue_WhenCategoryExists() {
         var categoryOng = new CategoryOng("Education");
 
         when(categoryOngRepository.findById(1L)).thenReturn(Optional.of(categoryOng));
@@ -96,7 +96,7 @@ class CategoryOngCommandServiceImplTest {
     }
 
     @Test
-    void handleDeleteCategoryOng_ShouldReturnFalse_WhenCategoryDoesNotExist() {
+    void testHandleDeleteCategoryOng_ShouldReturnFalse_WhenCategoryDoesNotExist() {
         when(categoryOngRepository.findById(1L)).thenReturn(Optional.empty());
 
         var result = categoryOngCommandService.handleDeleteCategoryOng(1L);

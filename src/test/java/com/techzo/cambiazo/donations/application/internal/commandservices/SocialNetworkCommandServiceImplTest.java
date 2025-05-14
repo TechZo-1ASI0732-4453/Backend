@@ -32,7 +32,7 @@ class SocialNetworkCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldCreateSocialNetwork_WhenValidCommand() {
+    void testShouldCreateSocialNetwork_WhenValidCommand() {
         var command = new CreateSocialNetworkCommand("Facebook", "https://facebook.com/ong", 1L);
         var ong = new Ong();
         var socialNetwork = new SocialNetwork(command, ong);
@@ -52,7 +52,7 @@ class SocialNetworkCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenOngNotFound() {
+    void testShouldThrowException_WhenOngNotFound() {
         var command = new CreateSocialNetworkCommand("Facebook", "https://facebook.com/ong", 1L);
 
         when(ongRepository.findById(command.ongId())).thenReturn(Optional.empty());
@@ -64,7 +64,7 @@ class SocialNetworkCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenSocialNetworkAlreadyExists() {
+    void testShouldThrowException_WhenSocialNetworkAlreadyExists() {
         var command = new CreateSocialNetworkCommand("Facebook", "https://facebook.com/ong", 1L);
         var ong = new Ong();
         var existingSocialNetwork = new SocialNetwork(command, ong);

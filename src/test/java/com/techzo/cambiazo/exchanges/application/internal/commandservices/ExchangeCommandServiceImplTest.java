@@ -32,7 +32,7 @@ class ExchangeCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldCreateExchange_WhenValidCommand() {
+    void testShouldCreateExchange_WhenValidCommand() {
         // Arrange
         var command = new CreateExchangeCommand(1L, 2L, "Pendiente");
         var productOwn = new Product();
@@ -55,7 +55,7 @@ class ExchangeCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenProductOwnNotFound() {
+    void testShouldThrowException_WhenProductOwnNotFound() {
         // Arrange
         var command = new CreateExchangeCommand(1L, 2L, "Pendiente");
         when(productRepository.findById(command.productOwnId())).thenReturn(Optional.empty());
@@ -68,7 +68,7 @@ class ExchangeCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenExchangeAlreadyExists() {
+    void testShouldThrowException_WhenExchangeAlreadyExists() {
         // Arrange
         var command = new CreateExchangeCommand(1L, 2L, "Pendiente");
         var productOwn = new Product();
@@ -84,7 +84,7 @@ class ExchangeCommandServiceImplTest {
     }
 
     @Test
-    void handleDeleteExchange_ShouldDeleteExchange_WhenExchangeExistsAndPending() {
+    void testDeleteExchange_ShouldDeleteExchange_WhenExchangeExistsAndPending() {
         // Arrange
         var exchange = new Exchange();
         exchange.setStatus("Pendiente");
@@ -99,7 +99,7 @@ class ExchangeCommandServiceImplTest {
     }
 
     @Test
-    void handleDeleteExchange_ShouldThrowException_WhenExchangeNotFound() {
+    void testDeleteExchange_ShouldThrowException_WhenExchangeNotFound() {
         // Arrange
         when(exchangeRepository.findById(1L)).thenReturn(Optional.empty());
 

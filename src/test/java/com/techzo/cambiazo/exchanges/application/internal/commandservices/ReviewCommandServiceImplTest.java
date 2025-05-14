@@ -38,7 +38,7 @@ class ReviewCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldCreateReview_WhenValidCommand() {
+    void testShouldCreateReview_WhenValidCommand() {
         // Arrange
         var command = new CreateReviewCommand("Great product!", 5, "ACTIVE", 1L, 2L, 3L);
         var exchange = new Exchange();
@@ -61,7 +61,7 @@ class ReviewCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenExchangeNotFound() {
+    void testShouldThrowException_WhenExchangeNotFound() {
         // Arrange
         var command = new CreateReviewCommand("Great product!", 5, "ACTIVE", 1L, 2L, 3L);
         when(exchangeRepository.findById(command.exchangeId())).thenReturn(Optional.empty());
@@ -73,7 +73,7 @@ class ReviewCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenUserAuthorNotFound() {
+    void testShouldThrowException_WhenUserAuthorNotFound() {
         // Arrange
         var command = new CreateReviewCommand("Great product!", 5, "ACTIVE", 1L, 2L, 3L);
         var exchange = new Exchange();
@@ -88,7 +88,7 @@ class ReviewCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenReviewAlreadyExists() {
+    void testShouldThrowException_WhenReviewAlreadyExists() {
         // Arrange
         var command = new CreateReviewCommand("Great product!", 5, "ACTIVE", 1L, 2L, 3L);
         var exchange = new Exchange();
@@ -108,7 +108,7 @@ class ReviewCommandServiceImplTest {
     }
 
     @Test
-    void handleDeleteReview_ShouldDeleteReview_WhenReviewExists() {
+    void testDeleteReview_ShouldDeleteReview_WhenReviewExists() {
         // Arrange
         var reviewId = 1L;
         var review = new Review();
@@ -124,7 +124,7 @@ class ReviewCommandServiceImplTest {
     }
 
     @Test
-    void handleDeleteReview_ShouldThrowException_WhenReviewNotFound() {
+    void testDeleteReview_ShouldThrowException_WhenReviewNotFound() {
         // Arrange
         var reviewId = 1L;
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());

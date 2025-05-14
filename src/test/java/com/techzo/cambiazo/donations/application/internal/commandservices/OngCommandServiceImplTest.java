@@ -33,7 +33,7 @@ class OngCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldCreateOng_WhenValidCommand() {
+    void testShouldCreateOng_WhenValidCommand() {
         var command = new CreateOngCommand("OngName", "email@example.com", "type", "aboutUs", "mission", "support", "address", "123456789", "logo", "website", "schedule", 1L);
         var categoryOng = new CategoryOng("Education");
         var ong = new Ong(command, categoryOng);
@@ -54,7 +54,7 @@ class OngCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenCategoryOngNotFound() {
+    void testShouldThrowException_WhenCategoryOngNotFound() {
         var command = new CreateOngCommand("OngName", "email@example.com", "type", "aboutUs", "mission", "support", "address", "123456789", "logo", "website", "schedule", 1L);
 
         when(categoryOngRepository.findById(command.categoryOngId())).thenReturn(Optional.empty());
@@ -65,7 +65,7 @@ class OngCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenOngNameAlreadyExists() {
+    void testShouldThrowException_WhenOngNameAlreadyExists() {
         var command = new CreateOngCommand("OngName", "email@example.com", "type", "aboutUs", "mission", "support", "address", "123456789", "logo", "website", "schedule", 1L);
         var existingOng = new Ong();
 
@@ -78,7 +78,7 @@ class OngCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldUpdateOng_WhenValidCommand() {
+    void testShouldUpdateOng_WhenValidCommand() {
         var command = new UpdateOngCommand(1L, "UpdatedName", "type", "aboutUs", "mission", "support", "address", "email@example.com", "123456789", "logo", "website", 1L, "schedule");
         var categoryOng = new CategoryOng("Education");
         var existingOng = new Ong();
@@ -97,7 +97,7 @@ class OngCommandServiceImplTest {
     }
 
     @Test
-    void handleDeleteOng_ShouldReturnTrue_WhenOngExists() {
+    void testHandleDeleteOng_ShouldReturnTrue_WhenOngExists() {
         var ong = new Ong();
 
         when(ongRepository.findById(1L)).thenReturn(Optional.of(ong));
@@ -110,7 +110,7 @@ class OngCommandServiceImplTest {
     }
 
     @Test
-    void handleDeleteOng_ShouldReturnFalse_WhenOngDoesNotExist() {
+    void testHandleDeleteOng_ShouldReturnFalse_WhenOngDoesNotExist() {
         when(ongRepository.findById(1L)).thenReturn(Optional.empty());
 
         var result = ongCommandService.handleDeleteOng(1L);

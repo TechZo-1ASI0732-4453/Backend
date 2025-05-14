@@ -27,7 +27,7 @@ class RoleCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldSeedRoles_WhenRolesDoNotExist() {
+    void testShouldSeedRoles_WhenRolesDoNotExist() {
         // Arrange
         var command = new SeedRolesCommand();
         for (Roles role : Roles.values()) {
@@ -45,7 +45,7 @@ class RoleCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldNotSeedRoles_WhenRolesAlreadyExist() {
+    void testShouldNotSeedRoles_WhenRolesAlreadyExist() {
         // Arrange
         var command = new SeedRolesCommand();
         for (Roles role : Roles.values()) {

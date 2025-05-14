@@ -26,7 +26,7 @@ class PlanCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldCreatePlan_WhenValidCommand() {
+    void testShouldCreatePlan_WhenValidCommand() {
         // Arrange
         var command = new CreatePlanCommand("Plan Básico", "Descripción del plan básico", 19.99);
         when(planRepository.existsByName(command.name())).thenReturn(false);
@@ -46,7 +46,7 @@ class PlanCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenPlanWithSameNameExists() {
+    void testShouldThrowException_WhenPlanWithSameNameExists() {
         // Arrange
         var command = new CreatePlanCommand("Plan Básico", "Descripción del plan básico", 19.99);
         when(planRepository.existsByName(command.name())).thenReturn(true);

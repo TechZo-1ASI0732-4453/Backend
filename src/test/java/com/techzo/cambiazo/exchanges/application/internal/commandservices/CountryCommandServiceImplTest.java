@@ -26,7 +26,7 @@ class CountryCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldCreateCountry_WhenValidCommand() {
+    void testShouldCreateCountry_WhenValidCommand() {
         // Arrange
         var command = new CreateCountryCommand("Argentina");
         var country = new Country(command);
@@ -45,7 +45,7 @@ class CountryCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenCountryAlreadyExists() {
+    void testShouldThrowException_WhenCountryAlreadyExists() {
         // Arrange
         var command = new CreateCountryCommand("Argentina");
 

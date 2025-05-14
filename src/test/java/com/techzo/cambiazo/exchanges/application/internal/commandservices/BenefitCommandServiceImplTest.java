@@ -31,7 +31,7 @@ class BenefitCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldCreateBenefit_WhenValidCommand() {
+    void testShouldCreateBenefit_WhenValidCommand() {
         // Arrange
         var command = new CreateBenefitCommand("Free Shipping", 1L);
         var plan = new Plan();
@@ -53,7 +53,7 @@ class BenefitCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenPlanNotFound() {
+    void testShouldThrowException_WhenPlanNotFound() {
         // Arrange
         var command = new CreateBenefitCommand("Free Shipping", 1L);
 

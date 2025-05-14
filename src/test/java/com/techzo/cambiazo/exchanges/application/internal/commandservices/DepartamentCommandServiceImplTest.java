@@ -31,7 +31,7 @@ class DepartamentCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldCreateDepartment_WhenValidCommand() {
+    void testShouldCreateDepartment_WhenValidCommand() {
         // Arrange
         var command = new CreateDepartmentCommand("Buenos Aires", 1L);
         var country = new Country();
@@ -55,7 +55,7 @@ class DepartamentCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenCountryNotFound() {
+    void testShouldThrowException_WhenCountryNotFound() {
         // Arrange
         var command = new CreateDepartmentCommand("Buenos Aires", 1L);
 
@@ -70,7 +70,7 @@ class DepartamentCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenDepartmentAlreadyExists() {
+    void testShouldThrowException_WhenDepartmentAlreadyExists() {
         // Arrange
         var command = new CreateDepartmentCommand("Buenos Aires", 1L);
         var country = new Country();

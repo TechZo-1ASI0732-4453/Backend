@@ -37,7 +37,7 @@ class FavoriteProductCommandServiceImplTest {
 
 
     @Test
-    void handle_ShouldThrowException_WhenUserNotFound() {
+    void testShouldThrowException_WhenUserNotFound() {
         // Arrange
         var command = new CreateFavoriteProductCommand(1L, 2L);
         when(userRepository.findById(command.userId())).thenReturn(Optional.empty());
@@ -50,7 +50,7 @@ class FavoriteProductCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenProductNotFound() {
+    void testShouldThrowException_WhenProductNotFound() {
         // Arrange
         var command = new CreateFavoriteProductCommand(1L, 2L);
         var user = new User();
@@ -65,7 +65,7 @@ class FavoriteProductCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenFavoriteProductAlreadyExists() {
+    void testShouldThrowException_WhenFavoriteProductAlreadyExists() {
         // Arrange
         var command = new CreateFavoriteProductCommand(1L, 2L);
         var user = new User();
@@ -81,7 +81,7 @@ class FavoriteProductCommandServiceImplTest {
     }
 
     @Test
-    void handleDeleteFavoriteProductByUserIdAndProductId_ShouldDelete_WhenExists() {
+    void testDeleteFavoriteProductByUserIdAndProductId_ShouldDelete_WhenExists() {
         // Arrange
         var user = new User();
         var product = new Product();
@@ -99,7 +99,7 @@ class FavoriteProductCommandServiceImplTest {
     }
 
     @Test
-    void handleDeleteFavoriteProductByUserIdAndProductId_ShouldReturnFalse_WhenNotExists() {
+    void testDeleteFavoriteProductByUserIdAndProductId_ShouldReturnFalse_WhenNotExists() {
         // Arrange
         var user = new User();
         var product = new Product();

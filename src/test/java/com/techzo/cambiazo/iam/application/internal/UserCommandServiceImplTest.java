@@ -35,7 +35,7 @@ class UserCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldReturnUserAndToken_WhenValidSignInCommand() {
+    void testShouldReturnUserAndToken_WhenValidSignInCommand() {
         // Arrange
         var username = "testuser";
         var password = "password123";
@@ -62,7 +62,7 @@ class UserCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenUserNotFound() {
+    void testShouldThrowException_WhenUserNotFound() {
         // Arrange
         var command = new SignInCommand("nonexistentuser", "password123");
         when(userRepository.findByUsername(command.username())).thenReturn(Optional.empty());
@@ -74,7 +74,7 @@ class UserCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenPasswordIsInvalid() {
+    void testShouldThrowException_WhenPasswordIsInvalid() {
         // Arrange
         var username = "testuser";
         var password = "wrongPassword";

@@ -26,7 +26,7 @@ class ProductCategoryCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldCreateProductCategory_WhenValidCommand() {
+    void testShouldCreateProductCategory_WhenValidCommand() {
         // Arrange
         var command = new CreateProductCategoryCommand("Electronics");
         when(productCategoryRepository.existsByName(command.name())).thenReturn(false);
@@ -44,7 +44,7 @@ class ProductCategoryCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenProductCategoryWithSameNameExists() {
+    void testShouldThrowException_WhenProductCategoryWithSameNameExists() {
         // Arrange
         var command = new CreateProductCategoryCommand("Electronics");
         when(productCategoryRepository.existsByName(command.name())).thenReturn(true);

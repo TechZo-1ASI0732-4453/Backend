@@ -32,7 +32,7 @@ class ProjectCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldCreateProject_WhenValidCommand() {
+    void testShouldCreateProject_WhenValidCommand() {
         var command = new CreateProjectCommand("ProjectName", "ProjectDescription", 1L);
         var ong = new Ong();
         var project = new Project(command, ong);
@@ -50,19 +50,19 @@ class ProjectCommandServiceImplTest {
     }
 
     @Test
-    void handle_ShouldThrowException_WhenOngNotFound() {
+    void testShouldThrowException_WhenOngNotFound() {
         var command = new CreateProjectCommand("ProjectName", "ProjectDescription", 1L);
 
         when(ongRepository.findById(command.ongId())).thenReturn(Optional.empty());
 
         var exception = assertThrows(OngNotFoundException.class, () -> projectCommandService.handle(command));
-        assertEquals("Ong with id 1 not found", exception.getMessage()); // Cambiado "ID" por "id"
+        assertEquals("Ong with id 1 not found", exception.getMessage());
         verify(ongRepository, times(1)).findById(command.ongId());
         verify(projectRepository, never()).save(any(Project.class));
     }
 
     @Test
-    void handleDeleteProject_ShouldReturnTrue_WhenProjectExists() {
+    void testDeleteProject_ShouldReturnTrue_WhenProjectExists() {
         var project = new Project();
 
         when(projectRepository.findById(1L)).thenReturn(Optional.of(project));
@@ -75,7 +75,7 @@ class ProjectCommandServiceImplTest {
     }
 
     @Test
-    void handleDeleteProject_ShouldReturnFalse_WhenProjectDoesNotExist() {
+    void testDeleteProject_ShouldReturnFalse_WhenProjectDoesNotExist() {
         when(projectRepository.findById(1L)).thenReturn(Optional.empty());
 
         var result = projectCommandService.handleDeleteProject(1L);
