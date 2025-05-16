@@ -2,6 +2,7 @@ package com.techzo.cambiazo.donations.interfaces.rest;
 
 import com.techzo.cambiazo.donations.domain.model.aggregates.Ong;
 import com.techzo.cambiazo.donations.domain.model.dtos.OngResponse;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;

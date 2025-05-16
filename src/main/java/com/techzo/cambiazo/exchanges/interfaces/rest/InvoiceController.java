@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.exchanges.interfaces.rest;
 
 import com.techzo.cambiazo.exchanges.domain.services.IInvoiceCommandService;
+import io.swagger.v3.oas.annotations.Hidden;
 import com.techzo.cambiazo.exchanges.interfaces.rest.resources.CreateInvoiceResource;
 import com.techzo.cambiazo.exchanges.interfaces.rest.resources.InvoiceResource;
 import com.techzo.cambiazo.exchanges.interfaces.rest.transform.CreateInvoiceCommandFromResourceAssembler;

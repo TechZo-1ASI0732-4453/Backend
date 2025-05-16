@@ -2,6 +2,7 @@ package com.techzo.cambiazo.donations.interfaces.rest;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.techzo.cambiazo.donations.domain.model.entities.CategoryOng;

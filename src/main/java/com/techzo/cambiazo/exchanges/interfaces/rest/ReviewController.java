@@ -2,6 +2,7 @@ package com.techzo.cambiazo.exchanges.interfaces.rest;
 
 import com.techzo.cambiazo.exchanges.domain.model.dtos.AverageAndCountReviewsDto;
 import com.techzo.cambiazo.exchanges.domain.model.dtos.ExistReview;
+import io.swagger.v3.oas.annotations.Hidden;
 import com.techzo.cambiazo.exchanges.domain.model.dtos.ReviewDto;
 import com.techzo.cambiazo.exchanges.domain.model.queries.FindReviewByUserAuthorIdAndExchangeId;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllReviewsByUserReceptorIdQuery;

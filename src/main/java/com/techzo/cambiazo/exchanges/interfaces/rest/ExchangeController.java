@@ -2,6 +2,7 @@ package com.techzo.cambiazo.exchanges.interfaces.rest;
 
 import com.techzo.cambiazo.exchanges.domain.model.dtos.ModifiedExchange;
 import com.techzo.cambiazo.exchanges.domain.model.queries.*;
+import io.swagger.v3.oas.annotations.Hidden;
 import com.techzo.cambiazo.exchanges.domain.services.IExchangeCommandService;
 import com.techzo.cambiazo.exchanges.domain.services.IExchangeQueryService;
 import com.techzo.cambiazo.exchanges.interfaces.rest.resources.CreateExchangeResource;
