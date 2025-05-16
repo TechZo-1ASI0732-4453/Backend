@@ -22,6 +22,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RestController
 @RequestMapping("/api/v2/exchanges")
 @Tag(name="Exchanges", description="Exchanges Management Endpoints")
+@Hidden
 public class ExchangeController {
     private final IExchangeCommandService exchangeCommandService;
 

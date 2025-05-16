@@ -14,6 +14,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
 @RequestMapping("api/v2/invoices")
+@Hidden
 @Tag(name = "Invoices", description = "Invoice Management Endpoints")
 public class InvoiceController {
 

@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(value = "/api/v2/donations/ongs", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Ongs", description = "Ongs Management Endpoints")
+@Hidden
 public class OngsController {
 
     private final OngCommandService ongCommandService;

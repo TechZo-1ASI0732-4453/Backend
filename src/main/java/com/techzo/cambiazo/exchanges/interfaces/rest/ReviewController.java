@@ -23,6 +23,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
 @RequestMapping("/api/v2/reviews")
+@Hidden
 @Tag(name = "Reviews", description = "Reviews Management Endpoints")
 public class ReviewController {
 
