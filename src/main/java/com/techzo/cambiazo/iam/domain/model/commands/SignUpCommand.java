@@ -11,6 +11,8 @@ public record SignUpCommand(
         String phoneNumber,
         String profilePicture,
         Boolean isGoogleAccount,
-        List<Role> roles
+        List<Role> roles,
+        String recaptchaToken
+
 ) {
 }

@@ -6,6 +6,7 @@ import com.techzo.cambiazo.exchanges.domain.model.entities.Plan;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Product;
 import com.techzo.cambiazo.exchanges.domain.model.entities.Subscription;
 import com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa.*;
+import com.techzo.cambiazo.iam.application.internal.outboundservices.captcha.RecaptchaQueryService;
 import com.techzo.cambiazo.iam.application.internal.outboundservices.hashing.HashingService;
 import com.techzo.cambiazo.iam.application.internal.outboundservices.tokens.TokenService;
 import com.techzo.cambiazo.iam.domain.model.aggregates.User;
@@ -40,6 +41,8 @@ public class UserCommandServiceImpl implements UserCommandService {
     private final ISubscriptionRepository subscriptionRepository;
     private final IPlanRepository planRepository;
     private final RoleRepository roleRepository;
+    private final RecaptchaQueryService recaptchaQueryService;
+
 
     public UserCommandServiceImpl(
             UserRepository userRepository,
@@ -49,7 +52,8 @@ public class UserCommandServiceImpl implements UserCommandService {
             IFavoriteProductRepository favoriteProductRepository,
             IProductRepository productRepository,
             ISubscriptionRepository subscriptionRepository,
-            IPlanRepository planRepository) {
+            IPlanRepository planRepository,
+            RecaptchaQueryService recaptchaQueryService) {
         this.userRepository = userRepository;
         this.hashingService = hashingService;
         this.tokenService = tokenService;
@@ -58,6 +62,8 @@ public class UserCommandServiceImpl implements UserCommandService {
         this.productRepository = productRepository;
         this.subscriptionRepository = subscriptionRepository;
         this.planRepository = planRepository;
+        this.recaptchaQueryService = recaptchaQueryService;
+
     }
 
     @Override
@@ -73,6 +79,13 @@ public class UserCommandServiceImpl implements UserCommandService {
 
     @Override
     public Optional<User> handle(SignUpCommand command) {
+
+        if (command.recaptchaToken() != null && !command.recaptchaToken().isBlank()) {
+            if (!recaptchaQueryService.validateRecaptcha(command.recaptchaToken())) {
+                throw  new RuntimeException("Exception: Captcha validation failed. Please try again.");
+            }
+        }
+
         if (userRepository.existsByUsername(command.username()))
             throw new RuntimeException("Username already exists");
 

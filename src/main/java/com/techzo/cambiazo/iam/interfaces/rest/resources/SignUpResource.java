@@ -9,7 +9,8 @@ public record SignUpResource(
         String phoneNumber,
         String profilePicture,
         Boolean isGoogleAccount,
-        List<String> roles
+        List<String> roles,
+        String recaptchaToken
 ) {
     public SignUpResource {
         if (isGoogleAccount == null) {

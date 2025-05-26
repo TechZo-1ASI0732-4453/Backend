@@ -35,12 +35,13 @@ public class IamContextFacade {
      * @param password The password of the user.
      * @return The id of the created user.
      */
-    public Long createUser(String username, String password,  String name, String phoneNumber, String profilePicture, boolean isGoogleAccount) {
-        var signUpCommand = new SignUpCommand(username, password, name, phoneNumber, profilePicture, isGoogleAccount, List.of(Role.getDefaultRole()));
+    public Long createUser(String username, String password,  String name, String phoneNumber, String profilePicture, boolean isGoogleAccount, String recaptchaToken) {
+        var signUpCommand = new SignUpCommand(username, password, name, phoneNumber, profilePicture, isGoogleAccount, List.of(Role.getDefaultRole()), recaptchaToken);
         var result = userCommandService.handle(signUpCommand);
         if (result.isEmpty()) return 0L;
         return result.get().getId();
     }
+
 
     /**
      * Creates a user with the given username, password and roles.
@@ -49,9 +50,9 @@ public class IamContextFacade {
      * @param roleNames The names of the roles of the user. When a role does not exist, it is ignored.
      * @return The id of the created user.
      */
-    public Long createUser(String username, String password, String name, String phoneNumber, String profilePicture, boolean isGoogleAccount, List<String> roleNames) {
+    public Long createUser(String username, String password, String name, String phoneNumber, String profilePicture, boolean isGoogleAccount, List<String> roleNames, String recaptchaToken) {
         var roles = roleNames != null ? roleNames.stream().map(Role::toRoleFromName).toList() : new ArrayList<Role>();
-        var signUpCommand = new SignUpCommand(username, password, name, phoneNumber, profilePicture, isGoogleAccount, roles);
+        var signUpCommand = new SignUpCommand(username, password, name, phoneNumber, profilePicture, isGoogleAccount, roles, recaptchaToken);
         var result = userCommandService.handle(signUpCommand);
         if (result.isEmpty()) return 0L;
         return result.get().getId();

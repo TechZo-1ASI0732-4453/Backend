@@ -16,7 +16,8 @@ public class SignUpCommandFromResourceAssembler {
                 resource.phoneNumber(),
                 resource.profilePicture(),
                 resource.isGoogleAccount() != null ? resource.isGoogleAccount() : false,
-                roles
+                roles,
+                resource.recaptchaToken()
         );
     }
 }
