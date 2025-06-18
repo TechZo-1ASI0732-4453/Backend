@@ -1,6 +1,5 @@
 package com.techzo.cambiazo.exchanges.application.internal.commandservices;
 
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
@@ -35,7 +34,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
-
+import java.time.*;
 import static java.awt.Color.BLACK;
 
 @Service
@@ -116,7 +115,7 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
         logo.scaleToFit(140, 70);
 
         Paragraph companyInfo = new Paragraph("""
-    CambiaZo Perú S.A.C.
+    CambiaZo
     Av.Los Helechos 123, Lima
     """, FontFactory.getFont(FontFactory.HELVETICA_BOLD, 13));
 
@@ -161,7 +160,7 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
         doc.add(wrapper);
 
         Paragraph foot = new Paragraph(
-                "Gracias por confiar en CambiaZo. Conserve el como comprobante de su pago.",
+                "Gracias por confiar en CambiaZo. Conserve el comprobante de su pago.",
                 FOOT);
         foot.setAlignment(Element.ALIGN_CENTER);
         foot.setSpacingBefore(30);
@@ -175,11 +174,13 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
         PdfPTable t = new PdfPTable(2);
         t.setWidths(new float[]{1.6f, 3.4f});
         t.setWidthPercentage(100);
+
+
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd 'de' MMMM yyyy – HH:mm")
                 .withLocale(new Locale("es","PE"));
         addRow(t,"Cliente:",  inv.getUser().getName());
         addRow(t,"Número:",   inv.getInvoiceNumber());
-        addRow(t,"Emitido:",  inv.getIssuedAt().format(fmt));
+        addRow(t,"Emitido:",  inv.getIssuedAt().atZone(ZoneId.of("America/Lima")).format(fmt));
         addRow(t,"Monto:",    "$ " + String.format(Locale.US,"%,.2f", inv.getAmount()));
         addRow(t,"Concepto:", inv.getDescription());
         return t;
