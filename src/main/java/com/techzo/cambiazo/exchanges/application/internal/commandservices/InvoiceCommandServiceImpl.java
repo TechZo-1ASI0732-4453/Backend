@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Optional;
@@ -179,7 +180,7 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
                 .withLocale(new Locale("es","PE"));
         addRow(t,"Cliente:",  inv.getUser().getName());
         addRow(t,"Número:",   inv.getInvoiceNumber());
-        addRow(t,"Emitido:",  inv.getIssuedAt().format(fmt));
+        addRow(t,"Emitido:",  inv.getIssuedAt().atZone(ZoneId.of("America/Lima")).format(fmt));
         addRow(t,"Monto:",    "$ " + String.format(Locale.US,"%,.2f", inv.getAmount()));
         addRow(t,"Concepto:", inv.getDescription());
         return t;
