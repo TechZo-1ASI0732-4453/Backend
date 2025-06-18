@@ -138,7 +138,7 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
         header.addCell(logoCell);
         doc.add(header);
 
-        Paragraph title = new Paragraph("BOLETA DE PAGO", TITLE);
+        Paragraph title = new Paragraph("COMPROBANTE DE PAGO", TITLE);
         title.setAlignment(Element.ALIGN_CENTER);
         title.setSpacingBefore(25);
         title.setSpacingAfter(25);
@@ -161,7 +161,7 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
         doc.add(wrapper);
 
         Paragraph foot = new Paragraph(
-                "Gracias por confiar en CambiaZo. Conserve esta boleta como comprobante de su pago.",
+                "Gracias por confiar en CambiaZo. Conserve el como comprobante de su pago.",
                 FOOT);
         foot.setAlignment(Element.ALIGN_CENTER);
         foot.setSpacingBefore(30);
@@ -220,7 +220,7 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
               <p>Visita ahora para probar tus beneficios <a href="https://cambia-zo.netlify.app/">CambiaZo</a>.</p>
               <p>Detalles de tu suscripción:</p>
               <table cellpadding="6" cellspacing="0" border="1">
-                <tr><td><strong>Número de boleta</strong></td><td>%s</td></tr>
+                <tr><td><strong>Número de comprobante </strong></td><td>%s</td></tr>
                 <tr><td><strong>Fecha de emisión</strong></td><td>%s</td></tr>
                 <tr><td><strong>Monto</strong></td><td>$ %,.2f</td></tr>
                 <tr><td><strong>Concepto</strong></td><td>%s</td></tr>
