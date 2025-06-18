@@ -177,10 +177,12 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
         t.setWidths(new float[]{1.6f, 3.4f});
         t.setWidthPercentage(100);
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd 'de' MMMM yyyy – HH:mm")
-                .withLocale(new Locale("es","PE"));
+                .withLocale(new Locale("es","PE"))
+                .withZone(ZoneId.of("America/Lima"));
+
         addRow(t,"Cliente:",  inv.getUser().getName());
         addRow(t,"Número:",   inv.getInvoiceNumber());
-        addRow(t,"Emitido:",  inv.getIssuedAt().atZone(ZoneId.of("America/Lima")).format(fmt));
+        addRow(t,"Emitido:",  inv.getIssuedAt().format(fmt));
         addRow(t,"Monto:",    "$ " + String.format(Locale.US,"%,.2f", inv.getAmount()));
         addRow(t,"Concepto:", inv.getDescription());
         return t;
