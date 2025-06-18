@@ -36,7 +36,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
-
+import java.time.ZonedDateTime;
 import static java.awt.Color.BLACK;
 
 @Service
@@ -176,13 +176,14 @@ public class InvoiceCommandServiceImpl implements IInvoiceCommandService {
         PdfPTable t = new PdfPTable(2);
         t.setWidths(new float[]{1.6f, 3.4f});
         t.setWidthPercentage(100);
+        ZonedDateTime issuedAt = inv.getIssuedAt().atZone(ZoneId.of("America/Lima"));
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd 'de' MMMM yyyy – HH:mm")
-                .withLocale(new Locale("es","PE"))
+                .withLocale(new Locale("es", "PE"))
                 .withZone(ZoneId.of("America/Lima"));
 
         addRow(t,"Cliente:",  inv.getUser().getName());
         addRow(t,"Número:",   inv.getInvoiceNumber());
-        addRow(t,"Emitido:",  inv.getIssuedAt().format(fmt));
+        addRow(t,"Emitido:",  fmt.format(issuedAt));
         addRow(t,"Monto:",    "$ " + String.format(Locale.US,"%,.2f", inv.getAmount()));
         addRow(t,"Concepto:", inv.getDescription());
         return t;
