@@ -29,7 +29,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 @RestController
 @RequestMapping("/api/v2/donations/account-number")
 @Tag(name="Account Number", description="Account Number Management Endpoints")
-@Hidden
+//@Hidden
 public class AccountNumberController {
 
     private final AccountNumberCommandService accountNumberCommandService;

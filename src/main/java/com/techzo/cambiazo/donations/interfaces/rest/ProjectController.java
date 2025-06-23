@@ -30,7 +30,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 @RestController
 @RequestMapping("/api/v2/donations/projects")
 @Tag(name="Projects", description="Projects Management Endpoints")
-@Hidden
+//@Hidden
 public class ProjectController {
 
     private final ProjectCommandService projectCommandService;

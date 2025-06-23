@@ -32,7 +32,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 @RestController
 @RequestMapping("/api/v2/donations/category-ongs")
 @Tag(name="CategoryOngs", description="CategoryOngs Management Endpoints")
-@Hidden
+//@Hidden
 public class CategoryOngsController {
 
     private final CategoryOngCommandService categoryOngCommandService;

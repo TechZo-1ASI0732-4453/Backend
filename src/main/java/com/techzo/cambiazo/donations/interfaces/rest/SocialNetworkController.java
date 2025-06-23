@@ -30,7 +30,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 @RestController
 @RequestMapping("/api/v2/donations/social-networks")
 @Tag(name="Social Networks", description="Social Networks Management Endpoints")
-@Hidden
+//@Hidden
 public class SocialNetworkController {
 
     private final SocialNetworkCommandService socialNetworkCommandService;
