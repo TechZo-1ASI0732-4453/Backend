@@ -26,7 +26,7 @@ jobs:
 
       - name: Build with Maven
         env:
-            DB_URL: jdbc:mysql://cambiazo-techzo.mysql.database.azure.com:3306/cambiazo?allowPublicKeyRetrieval=true&useSSL=true
+            DB_URL: jdbc:mysql://cambiazo-techzo.mysql.database.azure.com:3306/cambiazo?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
             DB_USERNAME: techzobd
             DB_PASSWORD: Cambiazo2025
         run: mvn clean install
