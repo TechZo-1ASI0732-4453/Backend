@@ -97,7 +97,7 @@ public class ProductQueryServiceImpl implements IProductQueryService {
     @Override
     public List<ProductDto> handle(GetAllProductsQuery query) {
         List<Product>products = productRepository.findAll();
-        List<User>users = userRepository.findAll();
+        List<User>users = userRepository.findAllWithRoles();
         return products.stream().map(product -> {
             District district = districts.stream().filter(d -> d.getId().equals(product.getDistrictId())).findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("District not found"));

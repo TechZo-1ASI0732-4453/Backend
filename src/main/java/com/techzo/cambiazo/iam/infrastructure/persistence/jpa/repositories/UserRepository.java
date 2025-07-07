@@ -2,8 +2,10 @@ package com.techzo.cambiazo.iam.infrastructure.persistence.jpa.repositories;
 
 import com.techzo.cambiazo.iam.domain.model.aggregates.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -17,6 +19,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * @param username The username.
      * @return The user object.
      */
+
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.roles")
+    List<User> findAllWithRoles();
+
     Optional<User> findByUsername(String username);
 
     /**
