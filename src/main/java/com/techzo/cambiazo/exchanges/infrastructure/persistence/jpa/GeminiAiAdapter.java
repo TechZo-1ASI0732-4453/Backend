@@ -2,8 +2,8 @@ package com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.techzo.cambiazo.exchanges.application.internal.services.ExchangeAiService.ProductSuggestion;
 import com.techzo.cambiazo.exchanges.domain.ports.AiSuggestionPort;
+import com.techzo.cambiazo.exchanges.interfaces.rest.resources.ProductSuggestionResource;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -38,44 +38,37 @@ public class GeminiAiAdapter implements AiSuggestionPort {
     }
 
     @Override
-    public ProductSuggestion suggestAllFromImage(byte[] image, String mimeType) {
-        List<String> categories = categoryRepository.findAll()
-                .stream().map(c -> c.getName().trim()).distinct().sorted().toList();
+    public ProductSuggestionResource suggestAllFromImage(byte[] image, String mimeType) {
+        List<String> categories = categoryRepository.findAll().stream()
+                .map(c -> c.getName().trim()).distinct().sorted().limit(60).toList();
 
         String raw = callGeminiVisionToJson(image, mimeType, categories);
 
         SuggestionPayload payload = parseSuggestionJson(raw);
 
         String price = normalizePrice(payload.price());
-
         String category = pickClosestCategory(payload.category(), categories);
+        int score = normalizeScore(payload.score());
 
-        return new ProductSuggestion(
+        return new ProductSuggestionResource(
                 emptyOr(payload.name(), "Producto"),
                 emptyOr(payload.description(), "Sin descripción"),
                 emptyOr(price, "0"),
-                emptyOr(category, categories.isEmpty() ? "Sin categoría" : categories.get(0))
+                emptyOr(category, categories.isEmpty() ? "Sin categoría" : categories.get(0)),
+                emptyOr(payload.suggest(), ""),
+                score
         );
     }
 
     private String callGeminiVisionToJson(byte[] image, String mimeType, List<String> categories) {
         String b64 = Base64.getEncoder().encodeToString(image);
-
         String categoriesInline = String.join("|", categories);
 
         String prompt = """
-                Eres un asistente de catálogo. Analiza la imagen del producto y devuelve SOLO este JSON (sin texto extra):
-                {"name":"...", "description":"...", "price":"...", "category":"..."}
-
-                Reglas:
-                - Español.
-                - "price": solo número (ej: "129.90"), sin símbolo ni texto.
-                - "category": escoge EXACTAMENTE una de esta lista: %s
-                - "description": máx 25 palabras; informativa.
-                - Si dudas, sé conservador.
-
-                Ahora analiza la imagen.
-                """.formatted(categoriesInline);
+          Output ONLY a JSON object in Spanish. No markdown.
+          Fields: {"name":"str","description":"str(≤25w)","price":"integer in PEN (no text or symbol)","category":"one of: %s","suggest":"short Spanish tips to improve the photo (lighting, background, angle, focus, framing, resolution)","score":"int 1-10"}
+          Rules: category from list; concise and accurate.
+        """.formatted(categoriesInline);
 
         var body = Map.of(
                 "contents", List.of(
@@ -86,6 +79,9 @@ public class GeminiAiAdapter implements AiSuggestionPort {
                                         "data", b64
                                 ))
                         ))
+                ),
+                "generationConfig", Map.of(
+                        "temperature", 0.2
                 )
         );
 
@@ -103,29 +99,32 @@ public class GeminiAiAdapter implements AiSuggestionPort {
         }
     }
 
-    private record SuggestionPayload(String name, String description, String price, String category) {}
+    private record SuggestionPayload(String name, String description, String price, String category,
+                                     String suggest, String score) {}
 
-    private SuggestionPayload parseSuggestionJson(String rawGeminiResponse) {
+    private SuggestionPayload parseSuggestionJson(String raw) {
         try {
-            JsonNode root = mapper.readTree(rawGeminiResponse);
+            JsonNode root = mapper.readTree(raw);
             JsonNode candidates = root.path("candidates");
             if (candidates.isArray() && candidates.size() > 0) {
                 JsonNode parts = candidates.get(0).path("content").path("parts");
                 for (JsonNode p : parts) {
                     if (p.has("text")) {
-                        String json = p.get("text").asText().trim();
-                        String cleaned = trimFence(json);
+                        String cleaned = trimFence(p.get("text").asText().trim());
                         JsonNode obj = mapper.readTree(cleaned);
-                        String name = optText(obj, "name");
-                        String desc = optText(obj, "description");
-                        String price = optText(obj, "price");
-                        String category = optText(obj, "category");
-                        return new SuggestionPayload(name, desc, price, category);
+                        return new SuggestionPayload(
+                                optText(obj, "name"),
+                                optText(obj, "description"),
+                                optText(obj, "price"),
+                                optText(obj, "category"),
+                                optText(obj, "suggest"),
+                                optText(obj, "score")
+                        );
                     }
                 }
             }
         } catch (Exception ignored) {}
-        return new SuggestionPayload("", "", "", "");
+        return new SuggestionPayload("", "", "", "", "", "");
     }
 
     private static String trimFence(String s) {
@@ -149,13 +148,31 @@ public class GeminiAiAdapter implements AiSuggestionPort {
         return digits.isBlank() ? "0" : digits;
     }
 
+    private static int normalizeScore(String s) {
+        if (s == null || s.isBlank()) return 5;
+        try {
+            int v;
+            if (s.contains(".") || s.contains(",")) {
+                double d = Double.parseDouble(s.replace(",", "."));
+                v = (int) Math.round(d);
+            } else {
+                v = Integer.parseInt(s.trim());
+            }
+            if (v < 1) v = 1;
+            if (v > 10) v = 10;
+            return v;
+        } catch (Exception e) {
+            return 5;
+        }
+    }
+
     private static String emptyOr(String v, String fallback) {
         return (v == null || v.isBlank()) ? fallback : v.trim();
     }
 
     private static String normalize(String s) {
         String n = s == null ? "" : s.toLowerCase(Locale.ROOT).trim();
-        n = Normalizer.normalize(n, Normalizer.Form.NFD).replaceAll("\\p{M}", ""); // quita acentos
+        n = Normalizer.normalize(n, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
         return n.replaceAll("\\s+", " ");
     }
 

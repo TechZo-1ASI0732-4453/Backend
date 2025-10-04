@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.exchanges.application.internal.commandservices;
 
 import com.techzo.cambiazo.exchanges.application.internal.services.ExchangeAiService;
+import com.techzo.cambiazo.exchanges.interfaces.rest.resources.ProductSuggestionResource;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,7 +13,7 @@ public class GenerateAiSuggestionsCommandService {
         this.exchangeAiService = exchangeAiService;
     }
 
-    public ExchangeAiService.ProductSuggestion suggestFromImage(byte[] image, String mimeType) {
+    public ProductSuggestionResource suggestFromImage(byte[] image, String mimeType) {
         return exchangeAiService.suggestAllFromImage(image, mimeType);
     }
 }

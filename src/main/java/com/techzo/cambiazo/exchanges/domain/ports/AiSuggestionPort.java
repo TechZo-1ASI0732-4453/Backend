@@ -1,8 +1,7 @@
 package com.techzo.cambiazo.exchanges.domain.ports;
 
-import com.techzo.cambiazo.exchanges.application.internal.services.ExchangeAiService.ProductSuggestion;
+import com.techzo.cambiazo.exchanges.interfaces.rest.resources.ProductSuggestionResource;
 
 public interface AiSuggestionPort {
-
-    ProductSuggestion suggestAllFromImage(byte[] image, String mimeType);
+    ProductSuggestionResource suggestAllFromImage(byte[] image, String mimeType);
 }
