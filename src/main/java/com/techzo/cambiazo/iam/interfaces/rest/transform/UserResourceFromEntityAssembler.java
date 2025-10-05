@@ -15,7 +15,9 @@ public class UserResourceFromEntityAssembler {
                 user.getProfilePicture(),
                 user.getIsActive(),
                 user.getIsGoogleAccount() != null ? user.getIsGoogleAccount() : false,
-                roles
+                roles,
+                user.getBanStatus().isActive(),
+                user.getBanStatus().bannedUntil()
         );
     }
 }

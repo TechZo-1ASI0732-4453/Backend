@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.iam.domain.model.aggregates;
 
 import com.techzo.cambiazo.iam.domain.model.entities.Role;
+import com.techzo.cambiazo.iam.domain.model.valueobjects.BanStatus;
 import com.techzo.cambiazo.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -9,6 +10,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -50,6 +52,14 @@ public class User extends AuditableAbstractAggregateRoot<User> {
 
     @Column(name = "is_google_account", nullable = false)
     private Boolean isGoogleAccount = false;
+
+    @Embedded
+    @AttributeOverrides({
+            @AttributeOverride(name = "active", column = @Column(name = "is_banned_from_posting", nullable = false)),
+            @AttributeOverride(name = "bannedUntil", column = @Column(name = "banned_until"))
+    })
+    private BanStatus banStatus = BanStatus.inactive();
+
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "user_roles",
@@ -115,4 +125,18 @@ public class User extends AuditableAbstractAggregateRoot<User> {
         this.roles.addAll(validatedRoleSet);
         return this;
     }
+
+    public void banFor(Duration duration) {
+        this.banStatus = BanStatus.activeFor(duration);
+    }
+
+    public boolean canPost() {
+        this.banStatus = banStatus.refresh();
+        return !banStatus.isActive();
+    }
+
+    public void unban() {
+        this.banStatus = BanStatus.inactive();
+    }
+
 }

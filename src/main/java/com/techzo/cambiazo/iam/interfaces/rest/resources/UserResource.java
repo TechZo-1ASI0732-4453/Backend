@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.iam.interfaces.rest.resources;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record UserResource(
@@ -10,7 +11,9 @@ public record UserResource(
         String profilePicture,
         Boolean isActive,
         Boolean isGoogleAccount,
-        List<String> roles
+        List<String> roles,
+        Boolean isBannedFromPosting,
+        LocalDateTime bannedUntil
 ) {
     public UserResource {
         if (isGoogleAccount == null) {
