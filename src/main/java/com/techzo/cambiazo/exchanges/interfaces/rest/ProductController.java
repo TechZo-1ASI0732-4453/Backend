@@ -1,6 +1,7 @@
 package com.techzo.cambiazo.exchanges.interfaces.rest;
 
 
+import com.techzo.cambiazo.exchanges.application.internal.outboundservices.IamAclOutboundService;
 import com.techzo.cambiazo.exchanges.domain.model.commands.DeleteProductOfPendingExchangesCommand;
 import com.techzo.cambiazo.exchanges.domain.model.dtos.ProductDto;
 import com.techzo.cambiazo.exchanges.domain.model.queries.GetAllProductsByProductCategoryIdQuery;
@@ -10,6 +11,7 @@ import com.techzo.cambiazo.exchanges.domain.model.queries.GetProductByIdQuery;
 import com.techzo.cambiazo.exchanges.domain.services.IProductCommandService;
 import com.techzo.cambiazo.exchanges.domain.services.IProductQueryService;
 import com.techzo.cambiazo.exchanges.interfaces.rest.resources.CreateProductResource;
+import com.techzo.cambiazo.exchanges.interfaces.rest.resources.ErrorResource;
 import com.techzo.cambiazo.exchanges.interfaces.rest.resources.ProductResource;
 import com.techzo.cambiazo.exchanges.interfaces.rest.resources.UpdateProductResource;
 import com.techzo.cambiazo.exchanges.interfaces.rest.transform.CreateProductCommandFromResourceAssembler;
@@ -17,10 +19,12 @@ import com.techzo.cambiazo.exchanges.interfaces.rest.transform.ProductResourceFr
 import com.techzo.cambiazo.exchanges.interfaces.rest.transform.UpdateProductCommandFromResourceAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.http.HttpStatus.CREATED;
 
@@ -33,23 +37,50 @@ public class ProductController {
 
     private final IProductQueryService productQueryService;
 
-    public ProductController(IProductCommandService productCommandService, IProductQueryService productQueryService) {
+    private final IamAclOutboundService iamAclOutboundService;
+
+
+    public ProductController(IProductCommandService productCommandService, IamAclOutboundService iamAclOutboundService, IProductQueryService productQueryService) {
         this.productCommandService = productCommandService;
+        this.iamAclOutboundService = iamAclOutboundService;
         this.productQueryService = productQueryService;
     }
 
 
     @Operation(summary = "Create a new Product", description = "Create a new Product with the input data.")
     @PostMapping
-    public ResponseEntity<ProductResource>createProduct(@RequestBody CreateProductResource resource) {
+    public ResponseEntity<?>createProduct(@RequestBody CreateProductResource resource) {
+
+        // Validate user is not banned
+        if (iamAclOutboundService.isUserBanned(resource.userId())) {
+            long remainingMinutes = iamAclOutboundService.getRemainingBanMinutes(resource.userId());
+            ErrorResource error = new ErrorResource(
+                    "Usuario baneado",
+                    "No puedes crear productos porque tu cuenta está temporalmente suspendida",
+                    remainingMinutes + 1,
+                    "Tu cuenta ha sido suspendida por violar las políticas de contenido"
+            );
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+        }
         try{
             var createProductCommand= CreateProductCommandFromResourceAssembler.toCommandFromResource(resource);
             var product= productCommandService.handle(createProductCommand);
             var productResource= ProductResourceFromEntityAssembler.toResourceFromEntity(product.get());
             return ResponseEntity.status(CREATED).body(productResource);
         }catch (IllegalArgumentException e){
-            return ResponseEntity.badRequest().build();
+            // Log el error para ver qué está pasando
+            System.err.println("Error creating product: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            // Captura cualquier otra excepción
+            System.err.println("Unexpected error creating product: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error interno", "details", e.getMessage()));
         }
+
     }
 
     @GetMapping("/{id}")

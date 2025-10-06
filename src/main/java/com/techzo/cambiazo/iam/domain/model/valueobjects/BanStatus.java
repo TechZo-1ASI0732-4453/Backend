@@ -32,9 +32,14 @@ public class BanStatus {
 
     public BanStatus refresh() {
         if (!active) return inactive();
-        if (LocalDateTime.now().isAfter(bannedUntil)) return inactive();
+        if (LocalDateTime.now().isAfter(bannedUntil)) {
+            this.active = false;
+            this.bannedUntil = null;
+            return this;
+        }
         return this;
     }
+
 
     public Duration getRemainingTime() {
         if (!active || bannedUntil == null) return Duration.ZERO;

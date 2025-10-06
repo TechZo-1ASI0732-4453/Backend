@@ -139,4 +139,14 @@ public class User extends AuditableAbstractAggregateRoot<User> {
         this.banStatus = BanStatus.inactive();
     }
 
+    public User updateBanStatus(Boolean active, Duration duration) {
+        if (active) {
+            this.banStatus = BanStatus.activeFor(duration);
+        } else {
+            this.banStatus = BanStatus.inactive();
+        }
+        return this;
+    }
+
+
 }

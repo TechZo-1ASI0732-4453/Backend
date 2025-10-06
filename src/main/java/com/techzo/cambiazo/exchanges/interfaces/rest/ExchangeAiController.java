@@ -38,7 +38,19 @@ public class ExchangeAiController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", "Usuario no encontrado", "message", "El userId proporcionado no existe"));
         }
-        
+
+        // Validate user is not banned
+        if (iamAclOutboundService.isUserBanned(userId)) {
+            long remainingMinutes = iamAclOutboundService.getRemainingBanMinutes(userId);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of(
+                            "error", "Usuario baneado",
+                            "message", "No puedes usar esta funcionalidad porque tu cuenta está temporalmente suspendida",
+                            "remainingBanMinutes", remainingMinutes,
+                            "reason", "Tu cuenta ha sido suspendida por violar las políticas de contenido"
+                    ));
+        }
+
         try {
             String ct = file.getContentType() != null ? file.getContentType() : MediaType.IMAGE_JPEG_VALUE;
             ProductSuggestionResource suggestion = aiService.suggestAllFromImage(file.getBytes(), ct);

@@ -15,4 +15,6 @@ public interface UserCommandService {
 
     Optional<User>handle(UpdateUserPasswordCommand command);
     boolean handleDeleteUserCommand(Long id);
+    Optional<User> handle(UpdateUserBanStatusCommand command);
+
 }

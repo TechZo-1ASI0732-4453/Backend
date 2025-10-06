@@ -204,4 +204,22 @@ public class UserCommandServiceImpl implements UserCommandService {
             throw new RuntimeException("Error while deleting user: " + e.getMessage());
         }
     }
+
+    @Override
+    public Optional<User> handle(UpdateUserBanStatusCommand command) {
+        var user = userRepository.findById(command.userId());
+        if (user.isEmpty()) {
+            throw new IllegalArgumentException("User with id " + command.userId() + " not found");
+        }
+
+        var updatedUser = user.get();
+        updatedUser.updateBanStatus(command.active(), command.banDuration());
+
+        try {
+            var savedUser = userRepository.save(updatedUser);
+            return Optional.of(savedUser);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Error updating user ban status: " + e.getMessage());
+        }
+    }
 }

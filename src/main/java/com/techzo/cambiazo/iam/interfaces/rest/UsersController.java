@@ -128,4 +128,20 @@ public class UsersController {
         return ResponseEntity.ok(user.get());
     }
 
+    @PutMapping("/ban-status/{userId}")
+    public ResponseEntity<UserResource2> updateUserBanStatus(@PathVariable Long userId, @RequestBody UpdateUserBanStatusResource resource) {
+        try {
+            var updateUserBanStatusCommand = UpdateUserBanStatusCommandFromResourceAssembler.toCommandFromResource(userId, resource);
+            var user = userCommandService.handle(updateUserBanStatusCommand);
+            if (user.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            var userResource = UserResource2FromEntityAssembler.toResourceFromEntity(user.get());
+            return ResponseEntity.ok(userResource);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+
 }
