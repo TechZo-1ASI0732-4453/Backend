@@ -7,6 +7,8 @@ import com.techzo.cambiazo.iam.domain.model.queries.GetUserByUsernameQuery;
 import com.techzo.cambiazo.iam.domain.services.UserCommandService;
 import com.techzo.cambiazo.iam.domain.services.UserQueryService;
 import org.apache.logging.log4j.util.Strings;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.List;
  * </p>
  *
  */
+@Service
 public class IamContextFacade {
     private final UserCommandService userCommandService;
     private final UserQueryService userQueryService;
@@ -79,6 +82,18 @@ public class IamContextFacade {
         var result = userQueryService.handle(getUserByIdQuery);
         if (result.isEmpty()) return Strings.EMPTY;
         return result.get().getUsername();
+    }
+
+    /**
+     * Validates if a user exists with the given id.
+     * @param userId The id of the user to validate.
+     * @return true if the user exists, false otherwise.
+     */
+    public boolean validateUserExists(Long userId) {
+        if (userId == null || userId <= 0) return false;
+        var getUserByIdQuery = new GetUserByIdQuery(userId);
+        var result = userQueryService.handle(getUserByIdQuery);
+        return result.isPresent();
     }
 
 }
