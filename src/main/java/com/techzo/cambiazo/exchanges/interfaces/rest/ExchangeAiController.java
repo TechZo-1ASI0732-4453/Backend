@@ -2,7 +2,9 @@ package com.techzo.cambiazo.exchanges.interfaces.rest;
 
 import com.techzo.cambiazo.exchanges.application.internal.services.ExchangeAiService;
 import com.techzo.cambiazo.exchanges.application.internal.outboundservices.IamAclOutboundService;
+import com.techzo.cambiazo.exchanges.application.internal.commandservices.ContentViolationCommandServiceImpl;
 import com.techzo.cambiazo.exchanges.domain.exceptions.ContentViolationException;
+import com.techzo.cambiazo.exchanges.domain.model.commands.ProcessContentViolationCommand;
 import com.techzo.cambiazo.exchanges.interfaces.rest.resources.ContentViolationResource;
 import com.techzo.cambiazo.exchanges.interfaces.rest.resources.ProductSuggestionResource;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,10 +23,12 @@ public class ExchangeAiController {
 
     private final ExchangeAiService aiService;
     private final IamAclOutboundService iamAclOutboundService;
+    private final ContentViolationCommandServiceImpl contentViolationCommandService;
 
-    public ExchangeAiController(ExchangeAiService aiService, IamAclOutboundService iamAclOutboundService) {
+    public ExchangeAiController(ExchangeAiService aiService, IamAclOutboundService iamAclOutboundService, ContentViolationCommandServiceImpl contentViolationCommandService) {
         this.aiService = aiService;
         this.iamAclOutboundService = iamAclOutboundService;
+        this.contentViolationCommandService = contentViolationCommandService;
     }
 
     @PostMapping(value="/suggest", consumes=MediaType.MULTIPART_FORM_DATA_VALUE, produces=MediaType.APPLICATION_JSON_VALUE)
@@ -40,12 +44,26 @@ public class ExchangeAiController {
             ProductSuggestionResource suggestion = aiService.suggestAllFromImage(file.getBytes(), ct);
             return ResponseEntity.ok(suggestion);
         } catch (ContentViolationException e) {
+            // Process the content violation and ban the user
+            var violationCommand = new ProcessContentViolationCommand(
+                userId,
+                e.getViolationType(),
+                e.getReason()
+            );
+            
+            // Process the violation and ban the user
+            contentViolationCommandService.processContentViolation(violationCommand);
+            
+            // Get remaining ban minutes for response
+            long remainingMinutes = contentViolationCommandService.getRemainingBanMinutes(userId);
+            
             ContentViolationResource violation = new ContentViolationResource(
                 e.getViolationType().name(),
                 e.getReason(),
-                e.getBanDurationMinutes(),
+                (int) remainingMinutes,
                 "Política de contenido de Cambiazo"
             );
+            
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(violation);
         }
     }

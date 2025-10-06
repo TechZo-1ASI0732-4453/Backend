@@ -32,4 +32,41 @@ public class IamAclOutboundService {
     public String getUsernameByUserId(Long userId) {
         return iamContextFacade.fetchUsernameByUserId(userId);
     }
+
+    /**
+     * Bans a user for the specified duration
+     * @param userId The user ID to ban
+     * @param banDurationMinutes The ban duration in minutes
+     * @return true if user was successfully banned, false otherwise
+     */
+    public boolean banUser(Long userId, int banDurationMinutes) {
+        return iamContextFacade.banUser(userId, banDurationMinutes);
+    }
+
+    /**
+     * Unbans a user
+     * @param userId The user ID to unban
+     * @return true if user was successfully unbanned, false otherwise
+     */
+    public boolean unbanUser(Long userId) {
+        return iamContextFacade.unbanUser(userId);
+    }
+
+    /**
+     * Checks if a user is currently banned
+     * @param userId The user ID to check
+     * @return true if user is banned, false otherwise
+     */
+    public boolean isUserBanned(Long userId) {
+        return iamContextFacade.isUserBanned(userId);
+    }
+
+    /**
+     * Gets the remaining ban duration for a user in minutes
+     * @param userId The user ID
+     * @return Minutes remaining, or 0 if not banned
+     */
+    public long getRemainingBanMinutes(Long userId) {
+        return iamContextFacade.getRemainingBanMinutes(userId);
+    }
 }

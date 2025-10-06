@@ -36,6 +36,12 @@ public class BanStatus {
         return this;
     }
 
+    public Duration getRemainingTime() {
+        if (!active || bannedUntil == null) return Duration.ZERO;
+        if (LocalDateTime.now().isAfter(bannedUntil)) return Duration.ZERO;
+        return Duration.between(LocalDateTime.now(), bannedUntil);
+    }
+
     public LocalDateTime bannedUntil() {
         return bannedUntil;
     }
