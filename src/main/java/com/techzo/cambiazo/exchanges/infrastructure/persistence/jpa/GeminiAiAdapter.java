@@ -2,6 +2,8 @@ package com.techzo.cambiazo.exchanges.infrastructure.persistence.jpa;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.techzo.cambiazo.exchanges.domain.exceptions.ContentViolationException;
+import com.techzo.cambiazo.exchanges.domain.model.ContentViolationType;
 import com.techzo.cambiazo.exchanges.domain.ports.AiSuggestionPort;
 import com.techzo.cambiazo.exchanges.interfaces.rest.resources.ProductSuggestionResource;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -46,6 +48,18 @@ public class GeminiAiAdapter implements AiSuggestionPort {
 
         SuggestionPayload payload = parseSuggestionJson(raw);
 
+        // Validar contenido antes de procesar
+        ContentViolationType violation = ContentViolationType.fromString(
+            emptyOr(payload.contentViolation(), "NONE")
+        );
+        
+        if (violation != ContentViolationType.NONE) {
+            throw new ContentViolationException(
+                violation,
+                emptyOr(payload.violationReason(), "Contenido no permitido por las políticas de Cambiazo")
+            );
+        }
+
         String price = normalizePrice(payload.price());
         String category = pickClosestCategory(payload.category(), categories);
         int score = normalizeScore(payload.score());
@@ -66,8 +80,8 @@ public class GeminiAiAdapter implements AiSuggestionPort {
 
         String prompt = """
           Output ONLY a JSON object in Spanish. No markdown.
-          Fields: {"name":"str","description":"str(≤25w)","price":"integer in PEN (no text or symbol)","category":"one of: %s","suggest":"short Spanish tips to improve the photo (lighting, background, angle, focus, framing, resolution)","score":"int 1-10"}
-          Rules: category from list; concise and accurate.
+          Fields: {"name":"str","description":"str(≤25w)","price":"integer in PEN (no text or symbol)","category":"one of: %s","suggest":"short Spanish tips to improve the photo (lighting, background, angle, focus, framing, resolution)","score":"int 1-10","contentViolation":"NONE|SEXUAL_EXPLICIT|WEAPONS_OR_DRUGS|VIOLENCE|PERSONAL_INFO","violationReason":"explanation if violation detected"}
+          Rules: category from list; concise and accurate. contentViolation: NONE if appropriate, otherwise specify violation type.
         """.formatted(categoriesInline);
 
         var body = Map.of(
@@ -100,7 +114,7 @@ public class GeminiAiAdapter implements AiSuggestionPort {
     }
 
     private record SuggestionPayload(String name, String description, String price, String category,
-                                     String suggest, String score) {}
+                                     String suggest, String score, String contentViolation, String violationReason) {}
 
     private SuggestionPayload parseSuggestionJson(String raw) {
         try {
@@ -118,13 +132,15 @@ public class GeminiAiAdapter implements AiSuggestionPort {
                                 optText(obj, "price"),
                                 optText(obj, "category"),
                                 optText(obj, "suggest"),
-                                optText(obj, "score")
+                                optText(obj, "score"),
+                                optText(obj, "contentViolation"),
+                                optText(obj, "violationReason")
                         );
                     }
                 }
             }
         } catch (Exception ignored) {}
-        return new SuggestionPayload("", "", "", "", "", "");
+        return new SuggestionPayload("", "", "", "", "", "", "NONE", "");
     }
 
     private static String trimFence(String s) {
