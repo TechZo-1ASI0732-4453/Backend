@@ -46,7 +46,7 @@ public class ExchangeAiController {
                     .body(Map.of(
                             "error", "Usuario baneado",
                             "message", "No puedes usar esta funcionalidad porque tu cuenta está temporalmente suspendida",
-                            "remainingBanMinutes", remainingMinutes,
+                            "remainingBanMinutes", remainingMinutes + 1,
                             "reason", "Tu cuenta ha sido suspendida por violar las políticas de contenido"
                     ));
         }
@@ -72,7 +72,7 @@ public class ExchangeAiController {
             ContentViolationResource violation = new ContentViolationResource(
                 e.getViolationType().name(),
                 e.getReason(),
-                (int) remainingMinutes,
+                (int) remainingMinutes + 1,
                 "Política de contenido de Cambiazo"
             );
             

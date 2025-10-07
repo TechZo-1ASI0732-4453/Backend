@@ -1,9 +1,9 @@
 package com.techzo.cambiazo.exchanges.domain.model;
 
 public enum ContentViolationType {
-    SEXUAL_EXPLICIT(2, "Contenido sexual explícito"),
-    WEAPONS_OR_DRUGS(2, "Armas o sustancias ilegales"),
-    VIOLENCE(720, "Contenido violento"),
+    SEXUAL_EXPLICIT(60, "Contenido sexual explícito"),
+    WEAPONS_OR_DRUGS(60, "Armas o sustancias ilegales"),
+    VIOLENCE(60, "Contenido violento"),
     PERSONAL_INFO(60, "Información personal sensible"),
     NONE(0, "Sin violaciones");
     
