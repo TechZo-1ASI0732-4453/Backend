@@ -13,7 +13,9 @@ public class AuthenticatedUserResourceFromEntityAssembler {
                 user.getProfilePicture(),
                 user.getIsActive(),
                 user.getIsGoogleAccount() != null ? user.getIsGoogleAccount() : false,
-                token
+                token,
+                user.getBanStatus().isActive(),
+                user.getBanStatus().bannedUntil()
         );
     }
 }

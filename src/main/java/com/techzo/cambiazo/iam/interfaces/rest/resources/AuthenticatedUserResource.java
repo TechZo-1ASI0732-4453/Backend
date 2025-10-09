@@ -8,7 +8,9 @@ public record AuthenticatedUserResource(
         String profilePicture,
         Boolean isActive,
         Boolean isGoogleAccount,
-        String token
+        String token,
+        Boolean isBannedFromPosting,
+        LocalDateTime bannedUntil
 ) {
     public AuthenticatedUserResource {
         if (isGoogleAccount == null) {
