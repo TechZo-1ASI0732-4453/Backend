@@ -1,5 +1,7 @@
 package com.techzo.cambiazo.iam.interfaces.rest.resources;
 
+import java.time.LocalDateTime;
+
 public record AuthenticatedUserResource(
         Long id,
         String username,
