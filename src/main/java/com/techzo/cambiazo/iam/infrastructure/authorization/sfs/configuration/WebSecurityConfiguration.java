@@ -95,6 +95,7 @@ public class WebSecurityConfiguration {
             cors.setAllowedOrigins(List.of("*"));
             cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
             cors.setAllowedHeaders(List.of("*"));
+            cors.setAllowCredentials(true);
             return cors;
         }));
         http.csrf(csrfConfigurer -> csrfConfigurer.disable())
@@ -124,7 +125,9 @@ public class WebSecurityConfiguration {
                                 "/api/v2/districts/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
-                                "/swagger-ui/**"
+                                "/swagger-ui/**",
+                                "/ws/**",
+                                "/ws"
                                 ).permitAll()
                         .anyRequest().authenticated());
         http.authenticationProvider(authenticationProvider());
