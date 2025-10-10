@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * IamContextFacade
@@ -141,5 +142,24 @@ public class IamContextFacade {
         Duration remaining = userBanCommandService.getRemainingBanDuration(userId);
         return remaining.toMinutes();
     }
+
+    /**
+     * Gets the ban status information for a user
+     * @param userId The user ID
+     * @return A map containing isBanned (Boolean) and bannedUntil (LocalDateTime), or null if user not found
+     */
+    public Map<String, Object> getUserBanInfo(Long userId) {
+        var getUserByIdQuery = new GetUserByIdQuery(userId);
+        var result = userQueryService.handle(getUserByIdQuery);
+
+        if (result.isEmpty()) return null;
+
+        var user = result.get();
+        return Map.of(
+                "isBanned", user.getBanStatus().isActive(),
+                "bannedUntil", user.getBanStatus().bannedUntil() != null ? user.getBanStatus().bannedUntil() : ""
+        );
+    }
+
 
 }
