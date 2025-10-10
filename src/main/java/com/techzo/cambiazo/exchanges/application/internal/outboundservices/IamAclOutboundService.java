@@ -3,6 +3,8 @@ package com.techzo.cambiazo.exchanges.application.internal.outboundservices;
 import com.techzo.cambiazo.iam.interfaces.acl.IamContextFacade;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 /**
  * ACL Outbound Service for communicating with IAM context
  */
@@ -69,4 +71,14 @@ public class IamAclOutboundService {
     public long getRemainingBanMinutes(Long userId) {
         return iamContextFacade.getRemainingBanMinutes(userId);
     }
+
+    /**
+     * Gets the ban status information for a user
+     * @param userId The user ID
+     * @return A map containing isBanned (Boolean) and bannedUntil (LocalDateTime)
+     */
+    public Map<String, Object> getUserBanInfo(Long userId) {
+        return iamContextFacade.getUserBanInfo(userId);
+    }
+
 }

@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @RestController
@@ -42,13 +43,18 @@ public class ExchangeAiController {
         // Validate user is not banned
         if (iamAclOutboundService.isUserBanned(userId)) {
             long remainingMinutes = iamAclOutboundService.getRemainingBanMinutes(userId);
+            Map<String, Object> banInfo = iamAclOutboundService.getUserBanInfo(userId);
+
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of(
                             "error", "Usuario baneado",
                             "message", "No puedes usar esta funcionalidad porque tu cuenta está temporalmente suspendida",
                             "remainingBanMinutes", remainingMinutes + 1,
-                            "reason", "Tu cuenta ha sido suspendida por violar las políticas de contenido"
+                            "reason", "Tu cuenta ha sido suspendida por violar las políticas de contenido",
+                            "isBanned", banInfo.get("isBanned"),
+                            "bannedUntil", banInfo.get("bannedUntil")
                     ));
+
         }
 
         try {
@@ -68,14 +74,19 @@ public class ExchangeAiController {
             
             // Get remaining ban minutes for response
             long remainingMinutes = contentViolationCommandService.getRemainingBanMinutes(userId);
-            
+            Map<String, Object> banInfo = iamAclOutboundService.getUserBanInfo(userId);
+
+
             ContentViolationResource violation = new ContentViolationResource(
-                e.getViolationType().name(),
-                e.getReason(),
-                (int) remainingMinutes + 1,
-                "Política de contenido de Cambiazo"
+                    e.getViolationType().name(),
+                    e.getReason(),
+                    (int) remainingMinutes + 1,
+                    "Política de contenido de Cambiazo",
+                    (Boolean) banInfo.get("isBanned"),
+                    (LocalDateTime) banInfo.get("bannedUntil")
             );
-            
+
+
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(violation);
         }
     }
