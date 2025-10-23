@@ -1,32 +1,106 @@
+// src/main/java/com/techzo/cambiazo/chat/application/services/InMemoryChatService.java
 package com.techzo.cambiazo.chat.application.services;
 
+import com.techzo.cambiazo.chat.application.dtos.ActiveConversation;
 import com.techzo.cambiazo.chat.application.dtos.ChatMessage;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.time.Instant;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class InMemoryChatService {
 
-    private final Map<String, List<ChatMessage>> chats = new ConcurrentHashMap<>();
+    private final Map<String, List<ChatMessage>> messagesByConversation = new ConcurrentHashMap<>();
 
-    public List<ChatMessage> getMessages(String conversationId) {
-        return chats.getOrDefault(conversationId, new ArrayList<>());
+    private final Map<String, Set<String>> conversationsByUser = new ConcurrentHashMap<>();
+
+    private final Map<String, ConversationMeta> conversationMeta = new ConcurrentHashMap<>();
+
+    private final Map<String, Map<String, Integer>> unreadMap = new ConcurrentHashMap<>();
+
+    public void addMessage(String conversationId, ChatMessage msg) {
+        messagesByConversation
+                .computeIfAbsent(conversationId, k -> Collections.synchronizedList(new ArrayList<>()))
+                .add(msg);
+
+        linkConversationToUser(msg.getSenderId(), conversationId);
+        linkConversationToUser(msg.getReceiverId(), conversationId);
+
+        conversationMeta.put(conversationId,
+                new ConversationMeta(msg.getContent(), msg.getTimestamp() == null ? Instant.now() : msg.getTimestamp()));
+
+        incrementUnread(msg.getReceiverId(), conversationId);
     }
 
-    public void addMessage(String conversationId, ChatMessage message) {
-        chats.computeIfAbsent(conversationId, k -> new ArrayList<>()).add(message);
+    public List<ChatMessage> getMessages(String conversationId) {
+        return messagesByConversation.getOrDefault(conversationId, Collections.emptyList());
     }
 
     public void clearChat(String conversationId) {
-        chats.remove(conversationId);
+        messagesByConversation.remove(conversationId);
+        conversationMeta.remove(conversationId);
+        for (Map<String, Integer> m : unreadMap.values()) {
+            m.remove(conversationId);
+        }
     }
 
-    public void expireOldChats(Duration ttl) {
-        // opcional: limpia chats inactivos
+    public List<ActiveConversation> getActiveConversations(String userId) {
+        Set<String> convs = conversationsByUser.getOrDefault(userId, Collections.emptySet());
+        List<ActiveConversation> out = new ArrayList<>(convs.size());
+
+        for (String cid : convs) {
+            ConversationMeta meta = conversationMeta.get(cid);
+            String peer = resolvePeer(userId, cid);
+            int unread = unreadMap.getOrDefault(userId, Collections.emptyMap()).getOrDefault(cid, 0);
+            out.add(new ActiveConversation(
+                    cid,
+                    peer,
+                    meta != null ? meta.lastMessage : null,
+                    meta != null ? meta.updatedAt : null,
+                    unread
+            ));
+        }
+
+        out.sort((a, b) -> {
+            Instant ia = a.getUpdatedAt() != null ? a.getUpdatedAt() : Instant.EPOCH;
+            Instant ib = b.getUpdatedAt() != null ? b.getUpdatedAt() : Instant.EPOCH;
+            return ib.compareTo(ia);
+        });
+
+        return out;
+    }
+
+    public void markConversationRead(String userId, String conversationId) {
+        unreadMap.computeIfAbsent(userId, k -> new ConcurrentHashMap<>()).put(conversationId, 0);
+    }
+
+    private void linkConversationToUser(String userId, String conversationId) {
+        conversationsByUser
+                .computeIfAbsent(userId, k -> ConcurrentHashMap.newKeySet())
+                .add(conversationId);
+    }
+
+    private void incrementUnread(String userId, String conversationId) {
+        unreadMap.computeIfAbsent(userId, k -> new ConcurrentHashMap<>())
+                .merge(conversationId, 1, Integer::sum);
+    }
+
+    private String resolvePeer(String userId, String conversationId) {
+        List<ChatMessage> list = messagesByConversation.get(conversationId);
+        if (list == null || list.isEmpty()) return null;
+        ChatMessage last = list.get(list.size() - 1);
+        if (userId.equals(last.getSenderId())) return last.getReceiverId();
+        return last.getSenderId();
+    }
+
+    private static class ConversationMeta {
+        private final String lastMessage;
+        private final Instant updatedAt;
+        ConversationMeta(String lastMessage, Instant updatedAt) {
+            this.lastMessage = lastMessage;
+            this.updatedAt = updatedAt;
+        }
     }
 }
