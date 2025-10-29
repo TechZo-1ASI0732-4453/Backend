@@ -25,10 +25,6 @@ jobs:
           distribution: 'microsoft'
 
       - name: Build with Maven
-        env:
-            DB_URL: jdbc:mysql://cambiazo-techzo.mysql.database.azure.com:3306/cambiazo?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
-            DB_USERNAME: techzobd
-            DB_PASSWORD: Cambiazo2025
         run: mvn clean install
 
       - name: Upload artifact for deployment job
@@ -40,7 +36,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
@@ -54,9 +49,9 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_E3CFE4C36140486EB2B3803F0FC0F2E7 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D7399441746A4473A3E580B1BC9973AE }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_EE7C47CCEBD04571AAF3CF7584D81760 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_370ECDBDA5574F8695FC3D0E3FDEFEEF }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_32A41848618749A5B6488F8DE0C83606 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_CA7F50E808C34776A1134691FF5CF687 }}
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
