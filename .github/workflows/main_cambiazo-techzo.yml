@@ -25,6 +25,10 @@ jobs:
           distribution: 'microsoft'
 
       - name: Build with Maven
+        env:
+            DB_URL: jdbc:mysql://cambiazo-techzo-server.mysql.database.azure.com:3306/cambiazo?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
+            DB_USERNAME: foduxwabdb
+            DB_PASSWORD: JTcVNpMETrdJNH$h
         run: mvn clean install
 
       - name: Upload artifact for deployment job
@@ -60,4 +64,5 @@ jobs:
           app-name: 'cambiazo-techzo'
           slot-name: 'Production'
           package: '*.jar'
+
           
