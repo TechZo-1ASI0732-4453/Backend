@@ -9,7 +9,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @Controller
@@ -32,8 +34,16 @@ public class ChatController {
             message.setConversationId(cid);
         }
 
+        if (message.getId() == null || message.getId().isBlank()) {
+            message.setId(UUID.randomUUID().toString());
+        }
+        if (message.getTimestamp() == null || message.getTimestamp().isBlank()) {
+            message.setTimestamp(Instant.now().toString());
+        }
+
         chatService.addMessage(cid, message);
 
+        // Eco a suscriptores del chat
         template.convertAndSend("/topic/chat." + cid, message);
 
         ActiveConversation senderActive = chatService.getActiveConversationFor(message.getSenderId(), cid);

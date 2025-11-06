@@ -17,10 +17,10 @@ public class InMemoryChatService {
     private final Map<String, Map<String, Integer>> unreadMap = new ConcurrentHashMap<>();
 
     public String ensureConversation(String conversationId) {
-        String cid = conversationId;
-        if (cid == null || cid.isBlank()) {
-            cid = UUID.randomUUID().toString();
-        }
+        String cid = (conversationId == null || conversationId.isBlank())
+                ? UUID.randomUUID().toString()
+                : conversationId;
+
         messagesByConversation.computeIfAbsent(cid, k -> Collections.synchronizedList(new ArrayList<>()));
         conversationMeta.putIfAbsent(cid, new ConversationMeta(null, Instant.EPOCH));
         return cid;
@@ -34,8 +34,8 @@ public class InMemoryChatService {
         linkConversationToUser(msg.getSenderId(), conversationId);
         linkConversationToUser(msg.getReceiverId(), conversationId);
 
-        conversationMeta.put(conversationId,
-                new ConversationMeta(msg.getContent(), msg.getTimestamp() == null ? Instant.now() : msg.getTimestamp()));
+        Instant updatedAt = safeParseInstant(msg.getTimestamp());
+        conversationMeta.put(conversationId, new ConversationMeta(msg.getContent(), updatedAt));
 
         incrementUnread(msg.getReceiverId(), conversationId);
     }
@@ -100,6 +100,14 @@ public class InMemoryChatService {
         ChatMessage last = list.get(list.size() - 1);
         if (userId.equals(last.getSenderId())) return last.getReceiverId();
         return last.getSenderId();
+    }
+
+    private Instant safeParseInstant(String iso) {
+        try {
+            return (iso == null || iso.isBlank()) ? Instant.now() : Instant.parse(iso);
+        } catch (Exception e) {
+            return Instant.now();
+        }
     }
 
     private static class ConversationMeta {
