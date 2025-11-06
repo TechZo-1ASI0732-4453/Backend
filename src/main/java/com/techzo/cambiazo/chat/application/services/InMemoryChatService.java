@@ -16,16 +16,13 @@ public class InMemoryChatService {
     private final Map<String, ConversationMeta> conversationMeta = new ConcurrentHashMap<>();
     private final Map<String, Map<String, Integer>> unreadMap = new ConcurrentHashMap<>();
 
-    public String ensureConversation(String conversationId, String senderId, String receiverId) {
+    public String ensureConversation(String conversationId) {
         String cid = conversationId;
         if (cid == null || cid.isBlank()) {
             cid = UUID.randomUUID().toString();
         }
-        linkConversationToUser(senderId, cid);
-        linkConversationToUser(receiverId, cid);
+        messagesByConversation.computeIfAbsent(cid, k -> Collections.synchronizedList(new ArrayList<>()));
         conversationMeta.putIfAbsent(cid, new ConversationMeta(null, Instant.EPOCH));
-        unreadMap.computeIfAbsent(senderId, k -> new ConcurrentHashMap<>()).putIfAbsent(cid, 0);
-        unreadMap.computeIfAbsent(receiverId, k -> new ConcurrentHashMap<>()).putIfAbsent(cid, 0);
         return cid;
     }
 

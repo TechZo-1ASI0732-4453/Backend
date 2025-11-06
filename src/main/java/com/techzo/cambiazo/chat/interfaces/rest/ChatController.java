@@ -27,11 +27,7 @@ public class ChatController {
 
     @MessageMapping("/chat.send")
     public void sendMessage(ChatMessage message) {
-        String cid = chatService.ensureConversation(
-                message.getConversationId(),
-                message.getSenderId(),
-                message.getReceiverId()
-        );
+        String cid = chatService.ensureConversation(message.getConversationId());
         if (!cid.equals(message.getConversationId())) {
             message.setConversationId(cid);
         }
