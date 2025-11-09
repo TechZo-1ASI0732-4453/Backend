@@ -4,16 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ActiveConversation {
+public class ConversationSummary {
     private String conversationId;
-    private String peerId;
-    private String lastMessage;
-    private Instant updatedAt;
-    private int unreadCount;
+    private String senderId;
+    private String receiverId;
     private String exchangeId;
 }
