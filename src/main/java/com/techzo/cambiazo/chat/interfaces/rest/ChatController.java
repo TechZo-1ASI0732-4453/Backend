@@ -41,19 +41,16 @@ public class ChatController {
 
         if (message.getType() == ChatMessage.MessageType.LOCATION) {
             if (message.getLatitude() == null || message.getLongitude() == null) {
-                throw new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Latitude and longitude are required for LOCATION messages"
-                );
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Latitude and longitude are required for LOCATION messages");
             }
         }
 
         if (message.getId() == null || message.getId().isEmpty()) {
             message.setId(UUID.randomUUID().toString());
         }
-
         if (message.getTimestamp() == null) {
-            message.setTimestamp(new Date());
+            message.setTimestamp(new Date()); // se serializa como ISO-8601 por @JsonFormat
         }
 
         chatService.addMessage(cid, message);

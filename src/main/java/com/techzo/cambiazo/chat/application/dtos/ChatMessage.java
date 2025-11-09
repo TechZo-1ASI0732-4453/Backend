@@ -1,5 +1,6 @@
 package com.techzo.cambiazo.chat.application.dtos;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -22,6 +23,8 @@ public class ChatMessage implements Serializable {
     private Double latitude;
     private Double longitude;
     private String locationLabel;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSX", timezone = "UTC")
     private Date timestamp;
 
     public ChatMessage() {
