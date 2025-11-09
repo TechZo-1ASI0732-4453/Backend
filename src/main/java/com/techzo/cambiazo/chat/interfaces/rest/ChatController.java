@@ -11,12 +11,12 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@Tag(name="Chat", description="Chat Management Endpoints")
+@Tag(name = "Chat", description = "Chat Management Endpoints")
 @RequestMapping("/api/v2/chat")
 public class ChatController {
 
@@ -31,25 +31,35 @@ public class ChatController {
     @MessageMapping("/chat.send")
     public void sendMessage(ChatMessage message) {
         String cid = chatService.ensureConversation(message.getConversationId());
-        if (!cid.equals(message.getConversationId())) message.setConversationId(cid);
+        if (message.getConversationId() == null || !cid.equals(message.getConversationId())) {
+            message.setConversationId(cid);
+        }
+
         if ("closed".equalsIgnoreCase(chatService.getConversationStatus(cid))) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Conversation is closed");
         }
 
         if (message.getType() == ChatMessage.MessageType.LOCATION) {
             if (message.getLatitude() == null || message.getLongitude() == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Latitude and longitude are required for LOCATION messages");
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Latitude and longitude are required for LOCATION messages"
+                );
             }
         }
 
-        if (message.getId() == null || message.getId().isBlank()) message.setId(UUID.randomUUID().toString());
-        if (message.getTimestamp() == null || message.getTimestamp().isBlank()) message.setTimestamp(Instant.now().toString());
+        if (message.getId() == null || message.getId().isEmpty()) {
+            message.setId(UUID.randomUUID().toString());
+        }
+
+        if (message.getTimestamp() == null) {
+            message.setTimestamp(new Date());
+        }
 
         chatService.addMessage(cid, message);
-
         template.convertAndSend("/topic/chat." + cid, message);
 
-        ActiveConversation senderActive = chatService.getActiveConversationFor(message.getSenderId(), cid);
+        ActiveConversation senderActive   = chatService.getActiveConversationFor(message.getSenderId(), cid);
         ActiveConversation receiverActive = chatService.getActiveConversationFor(message.getReceiverId(), cid);
 
         template.convertAndSend("/topic/inbox." + message.getSenderId(), senderActive);
@@ -60,7 +70,7 @@ public class ChatController {
     public String openConversation(@RequestParam(required = false) String conversationId,
                                    @RequestParam(required = false) String exchangeId) {
         String cid = chatService.ensureConversation(conversationId);
-        if (exchangeId != null && !exchangeId.isBlank()) {
+        if (exchangeId != null && !exchangeId.isEmpty()) {
             chatService.setConversationExchangeId(cid, exchangeId);
         }
         return cid;

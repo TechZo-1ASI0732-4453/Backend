@@ -6,7 +6,6 @@ import com.techzo.cambiazo.chat.application.dtos.ConversationSummary;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -25,8 +24,9 @@ public class InMemoryChatService implements ChatService {
         String cid = (conversationId == null || conversationId.isBlank())
                 ? UUID.randomUUID().toString()
                 : conversationId;
+
         messagesByConversation.computeIfAbsent(cid, k -> Collections.synchronizedList(new ArrayList<>()));
-        conversationMeta.putIfAbsent(cid, new ConversationMeta(null, null, "open", Instant.EPOCH));
+        conversationMeta.putIfAbsent(cid, new ConversationMeta(null, null, "open", new Date(0)));
         return cid;
     }
 
@@ -35,6 +35,10 @@ public class InMemoryChatService implements ChatService {
         ConversationMeta meta = conversationMeta.get(conversationId);
         if (meta != null && "closed".equalsIgnoreCase(meta.status)) return;
 
+        if (msg.getTimestamp() == null) {
+            msg.setTimestamp(new Date());
+        }
+
         messagesByConversation
                 .computeIfAbsent(conversationId, k -> Collections.synchronizedList(new ArrayList<>()))
                 .add(msg);
@@ -42,13 +46,18 @@ public class InMemoryChatService implements ChatService {
         linkConversationToUser(msg.getSenderId(), conversationId);
         linkConversationToUser(msg.getReceiverId(), conversationId);
 
-        Instant updatedAt = safeParseInstant(msg.getTimestamp());
-        ConversationMeta prev = conversationMeta.get(conversationId);
+        Date updatedAt = safeDate(msg.getTimestamp());
+
+        String prevExchange = (meta != null) ? meta.exchangeId : null;
         String exchangeId = (msg.getExchangeId() != null && !msg.getExchangeId().isBlank())
                 ? msg.getExchangeId()
-                : (prev != null ? prev.exchangeId : null);
+                : prevExchange;
 
-        conversationMeta.put(conversationId, new ConversationMeta(msg.getContent(), exchangeId, "open", updatedAt));
+        conversationMeta.put(
+                conversationId,
+                new ConversationMeta(msg.getContent(), exchangeId, "open", updatedAt)
+        );
+
         incrementUnread(msg.getReceiverId(), conversationId);
     }
 
@@ -69,11 +78,13 @@ public class InMemoryChatService implements ChatService {
     public List<ActiveConversation> getActiveConversations(String userId) {
         Set<String> convs = conversationsByUser.getOrDefault(userId, Collections.emptySet());
         List<ActiveConversation> out = new ArrayList<>(convs.size());
-        for (String cid : convs) out.add(getActiveConversationFor(userId, cid));
+        for (String cid : convs) {
+            out.add(getActiveConversationFor(userId, cid));
+        }
         out.sort((a, b) -> {
-            Instant ia = a.getUpdatedAt() != null ? a.getUpdatedAt() : Instant.EPOCH;
-            Instant ib = b.getUpdatedAt() != null ? b.getUpdatedAt() : Instant.EPOCH;
-            return ib.compareTo(ia);
+            Date da = (a.getUpdatedAt() != null) ? a.getUpdatedAt() : new Date(0);
+            Date db = (b.getUpdatedAt() != null) ? b.getUpdatedAt() : new Date(0);
+            return db.compareTo(da);
         });
         return out;
     }
@@ -87,7 +98,10 @@ public class InMemoryChatService implements ChatService {
     public ActiveConversation getActiveConversationFor(String userId, String conversationId) {
         ConversationMeta meta = conversationMeta.get(conversationId);
         String peer = resolvePeer(userId, conversationId);
-        int unread = unreadMap.getOrDefault(userId, Collections.emptyMap()).getOrDefault(conversationId, 0);
+        int unread = unreadMap
+                .getOrDefault(userId, Collections.emptyMap())
+                .getOrDefault(conversationId, 0);
+
         return new ActiveConversation(
                 conversationId,
                 peer,
@@ -118,9 +132,9 @@ public class InMemoryChatService implements ChatService {
     public List<ConversationSummary> getAllConversationSummaries() {
         return conversationMeta.entrySet().stream()
                 .sorted((a, b) -> {
-                    Instant ia = a.getValue().updatedAt != null ? a.getValue().updatedAt : Instant.EPOCH;
-                    Instant ib = b.getValue().updatedAt != null ? b.getValue().updatedAt : Instant.EPOCH;
-                    return ib.compareTo(ia);
+                    Date da = (a.getValue().updatedAt != null) ? a.getValue().updatedAt : new Date(0);
+                    Date db = (b.getValue().updatedAt != null) ? b.getValue().updatedAt : new Date(0);
+                    return db.compareTo(da);
                 })
                 .map(e -> {
                     String cid = e.getKey();
@@ -141,20 +155,25 @@ public class InMemoryChatService implements ChatService {
     public void setConversationExchangeId(String conversationId, String exchangeId) {
         ConversationMeta prev = conversationMeta.get(conversationId);
         if (prev == null) {
-            conversationMeta.put(conversationId, new ConversationMeta(null, exchangeId, "open", Instant.EPOCH));
+            conversationMeta.put(conversationId, new ConversationMeta(null, exchangeId, "open", new Date(0)));
         } else {
             conversationMeta.put(conversationId, new ConversationMeta(prev.lastMessage, exchangeId, prev.status, prev.updatedAt));
         }
     }
 
+    // -------- helpers --------
+
     private void linkConversationToUser(String userId, String conversationId) {
+        if (userId == null || userId.isBlank()) return;
         conversationsByUser
                 .computeIfAbsent(userId, k -> ConcurrentHashMap.newKeySet())
                 .add(conversationId);
     }
 
     private void incrementUnread(String userId, String conversationId) {
-        unreadMap.computeIfAbsent(userId, k -> new ConcurrentHashMap<>())
+        if (userId == null || userId.isBlank()) return;
+        unreadMap
+                .computeIfAbsent(userId, k -> new ConcurrentHashMap<>())
                 .merge(conversationId, 1, Integer::sum);
     }
 
@@ -162,24 +181,22 @@ public class InMemoryChatService implements ChatService {
         List<ChatMessage> list = messagesByConversation.get(conversationId);
         if (list == null || list.isEmpty()) return null;
         ChatMessage last = list.get(list.size() - 1);
-        if (userId.equals(last.getSenderId())) return last.getReceiverId();
+        if (userId != null && userId.equals(last.getSenderId())) return last.getReceiverId();
         return last.getSenderId();
     }
 
-    private Instant safeParseInstant(String iso) {
-        try {
-            return (iso == null || iso.isBlank()) ? Instant.now() : Instant.parse(iso);
-        } catch (Exception e) {
-            return Instant.now();
-        }
+    private static Date safeDate(Date d) {
+        return (d == null) ? new Date() : d;
     }
 
+    // Meta interna con java.util.Date
     private static class ConversationMeta {
         private final String lastMessage;
         private final String exchangeId;
         private final String status;
-        private final Instant updatedAt;
-        ConversationMeta(String lastMessage, String exchangeId, String status, Instant updatedAt) {
+        private final Date updatedAt;
+
+        ConversationMeta(String lastMessage, String exchangeId, String status, Date updatedAt) {
             this.lastMessage = lastMessage;
             this.exchangeId = exchangeId;
             this.status = status;

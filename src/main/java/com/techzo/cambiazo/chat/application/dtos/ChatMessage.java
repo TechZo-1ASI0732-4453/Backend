@@ -3,7 +3,7 @@ package com.techzo.cambiazo.chat.application.dtos;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.time.Instant;
+import java.util.Date;
 
 @Data
 public class ChatMessage implements Serializable {
@@ -22,10 +22,11 @@ public class ChatMessage implements Serializable {
     private Double latitude;
     private Double longitude;
     private String locationLabel;
+    private Date timestamp;
 
-    private String timestamp;
-
-    public ChatMessage() {}
+    public ChatMessage() {
+        this.timestamp = new Date();
+    }
 
     public ChatMessage(String senderId, String receiverId, String conversationId, String content) {
         this.senderId = senderId;
@@ -33,7 +34,7 @@ public class ChatMessage implements Serializable {
         this.conversationId = conversationId;
         this.content = content;
         this.type = MessageType.TEXT;
-        this.timestamp = Instant.now().toString();
+        this.timestamp = new Date();
     }
 
     public ChatMessage(String senderId, String receiverId, String conversationId, String exchangeId, String content) {
@@ -54,7 +55,7 @@ public class ChatMessage implements Serializable {
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +
                 ", locationLabel='" + locationLabel + '\'' +
-                ", timestamp='" + timestamp + '\'' +
+                ", timestamp=" + timestamp +
                 '}';
     }
 }

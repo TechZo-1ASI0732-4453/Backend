@@ -1,15 +1,12 @@
 package com.techzo.cambiazo.chat.application.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.techzo.cambiazo.chat.application.dtos.ActiveConversation;
 import com.techzo.cambiazo.chat.application.dtos.ChatMessage;
 import com.techzo.cambiazo.chat.application.dtos.ConversationSummary;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.*;
 
 @Service
@@ -19,16 +16,13 @@ public class RedisChatService implements ChatService {
     private final StringRedisTemplate srt;
     private final RedisTemplate<String, Object> rt;
     private final RedisTemplate<String, ChatMessage> chatRt;
-    private final ObjectMapper mapper;
 
     public RedisChatService(StringRedisTemplate srt,
                             RedisTemplate<String, Object> rt,
-                            RedisTemplate<String, ChatMessage> chatRt,
-                            ObjectMapper mapper) {
+                            RedisTemplate<String, ChatMessage> chatRt) {
         this.srt = srt;
         this.rt = rt;
         this.chatRt = chatRt;
-        this.mapper = mapper;
     }
 
     private static String kConvMsgs(String cid)    { return "conv:" + cid + ":messages"; }
@@ -48,10 +42,11 @@ public class RedisChatService implements ChatService {
         BoundHashOperations<String, Object, Object> meta = rt.boundHashOps(kConvMeta(cid));
         if (Boolean.FALSE.equals(srt.hasKey(kConvMeta(cid)))) {
             meta.put("status", "open");
-            meta.put("updatedAt", Instant.EPOCH.toString());
+            // guardamos epoch millis como String
+            meta.put("updatedAt", "0");
         }
         srt.opsForSet().add(K_ALL_CONVS, cid);
-        srt.opsForZSet().add(K_CONV_UPDATED_ZS, cid, Instant.EPOCH.toEpochMilli());
+        srt.opsForZSet().add(K_CONV_UPDATED_ZS, cid, 0.0);
         return cid;
     }
 
@@ -97,8 +92,9 @@ public class RedisChatService implements ChatService {
 
         meta.put("status", "open");
 
-        String ts = Optional.ofNullable(msg.getTimestamp()).orElse(Instant.now().toString());
-        meta.put("updatedAt", ts);
+        Date ts = (msg.getTimestamp() != null) ? msg.getTimestamp() : new Date();
+        String tsMillis = String.valueOf(ts.getTime());
+        meta.put("updatedAt", tsMillis);
 
         meta.putIfAbsent("firstSenderId",   msg.getSenderId());
         meta.putIfAbsent("firstReceiverId", msg.getReceiverId());
@@ -112,8 +108,8 @@ public class RedisChatService implements ChatService {
             rt.opsForHash().put(kUnread(msg.getReceiverId()), conversationId, next);
         }
 
-        long score = Instant.parse(ts).toEpochMilli();
-        srt.opsForZSet().add(K_CONV_UPDATED_ZS, conversationId, score);
+        // ZSET con score = epoch millis
+        srt.opsForZSet().add(K_CONV_UPDATED_ZS, conversationId, Double.parseDouble(tsMillis));
     }
 
     @Override
@@ -168,7 +164,7 @@ public class RedisChatService implements ChatService {
             String lastSender = bytes(metaRaw, "lastSenderId", null);
             String lastReceiver = bytes(metaRaw, "lastReceiverId", null);
 
-            Instant updated = parseInstant(updatedStr);
+            Date updated = parseDateMillis(updatedStr);
             int unread = 0;
             if (unreadObj instanceof byte[] b) {
                 try { unread = Integer.parseInt(new String(b)); } catch (Exception ignored) {}
@@ -183,7 +179,8 @@ public class RedisChatService implements ChatService {
             out.add(new ActiveConversation(cid, peer, last, updated, unread, exchangeId));
         }
 
-        out.sort(Comparator.comparing(ActiveConversation::getUpdatedAt, Comparator.nullsFirst(Comparator.naturalOrder())).reversed());
+        out.sort(Comparator.comparing(ActiveConversation::getUpdatedAt,
+                Comparator.nullsFirst(Comparator.naturalOrder())).reversed());
         return out;
     }
 
@@ -200,7 +197,7 @@ public class RedisChatService implements ChatService {
         String exchangeId = str(meta.get("exchangeId"), null);
         String lastSender = str(meta.get("lastSenderId"), null);
         String lastReceiver = str(meta.get("lastReceiverId"), null);
-        Instant updated = parseInstant(updatedStr);
+        Date updated = parseDateMillis(updatedStr);
 
         Object unreadObj = rt.opsForHash().get(kUnread(userId), conversationId);
         int unread = (unreadObj instanceof Number) ? ((Number) unreadObj).intValue() : 0;
@@ -234,7 +231,6 @@ public class RedisChatService implements ChatService {
 
     @Override
     public List<ConversationSummary> getAllConversationSummaries() {
-        // usa ZSET para ordenar por updatedAt (más reciente primero)
         Set<String> cids = srt.opsForZSet().reverseRange(K_CONV_UPDATED_ZS, 0, -1);
         if (cids == null || cids.isEmpty()) return List.of();
 
@@ -255,9 +251,14 @@ public class RedisChatService implements ChatService {
         rt.boundHashOps(kConvMeta(conversationId)).put("exchangeId", exchangeId);
     }
 
-    private static Instant parseInstant(String v) {
-        try { return v == null ? null : Instant.parse(v); }
-        catch (Exception e) { return null; }
+    private static Date parseDateMillis(String v) {
+        try {
+            if (v == null || v.isBlank()) return null;
+            long ms = Long.parseLong(v.trim());
+            return new Date(ms);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private static String str(Object v, String def) {
