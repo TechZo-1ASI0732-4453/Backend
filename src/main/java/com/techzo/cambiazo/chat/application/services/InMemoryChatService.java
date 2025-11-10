@@ -35,9 +35,7 @@ public class InMemoryChatService implements ChatService {
         ConversationMeta meta = conversationMeta.get(conversationId);
         if (meta != null && "closed".equalsIgnoreCase(meta.status)) return;
 
-        if (msg.getTimestamp() == null) {
-            msg.setTimestamp(new Date());
-        }
+        if (msg.getTimestamp() == null) msg.setTimestamp(new Date());
 
         messagesByConversation
                 .computeIfAbsent(conversationId, k -> Collections.synchronizedList(new ArrayList<>()))
@@ -161,6 +159,12 @@ public class InMemoryChatService implements ChatService {
         }
     }
 
+    @Override
+    public String getConversationExchangeId(String conversationId) { // ✅ agregado
+        ConversationMeta meta = conversationMeta.get(conversationId);
+        return (meta != null) ? meta.exchangeId : null;
+    }
+
     // -------- helpers --------
 
     private void linkConversationToUser(String userId, String conversationId) {
@@ -189,7 +193,6 @@ public class InMemoryChatService implements ChatService {
         return (d == null) ? new Date() : d;
     }
 
-    // Meta interna con java.util.Date
     private static class ConversationMeta {
         private final String lastMessage;
         private final String exchangeId;
