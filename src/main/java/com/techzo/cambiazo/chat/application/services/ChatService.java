@@ -3,7 +3,6 @@ package com.techzo.cambiazo.chat.application.services;
 import com.techzo.cambiazo.chat.application.dtos.ActiveConversation;
 import com.techzo.cambiazo.chat.application.dtos.ChatMessage;
 import com.techzo.cambiazo.chat.application.dtos.ConversationSummary;
-
 import java.util.List;
 
 public interface ChatService {
@@ -22,4 +21,5 @@ public interface ChatService {
     String getConversationStatus(String conversationId);
 
     void setConversationExchangeId(String conversationId, String exchangeId);
+    String getConversationExchangeId(String conversationId);
 }

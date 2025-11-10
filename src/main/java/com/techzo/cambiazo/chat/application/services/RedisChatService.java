@@ -190,6 +190,13 @@ public class RedisChatService implements ChatService {
     }
 
     @Override
+    public String getConversationExchangeId(String conversationId) {
+        Object v = rt.boundHashOps(kConvMeta(conversationId)).get("exchangeId");
+        return v == null ? null : String.valueOf(v);
+    }
+
+
+    @Override
     public ActiveConversation getActiveConversationFor(String userId, String conversationId) {
         Map<Object, Object> meta = rt.opsForHash().entries(kConvMeta(conversationId));
         String last = str(meta.get("lastMessage"), "");

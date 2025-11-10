@@ -50,7 +50,12 @@ public class ChatController {
             message.setId(UUID.randomUUID().toString());
         }
         if (message.getTimestamp() == null) {
-            message.setTimestamp(new Date()); // se serializa como ISO-8601 por @JsonFormat
+            message.setTimestamp(new Date());
+        }
+
+        // 🔹 Vincula siempre el exchangeId
+        if (message.getExchangeId() != null && !message.getExchangeId().isEmpty()) {
+            chatService.setConversationExchangeId(cid, message.getExchangeId());
         }
 
         chatService.addMessage(cid, message);
@@ -58,6 +63,9 @@ public class ChatController {
 
         ActiveConversation senderActive   = chatService.getActiveConversationFor(message.getSenderId(), cid);
         ActiveConversation receiverActive = chatService.getActiveConversationFor(message.getReceiverId(), cid);
+
+        senderActive.setExchangeId(chatService.getConversationExchangeId(cid));
+        receiverActive.setExchangeId(chatService.getConversationExchangeId(cid));
 
         template.convertAndSend("/topic/inbox." + message.getSenderId(), senderActive);
         template.convertAndSend("/topic/inbox." + message.getReceiverId(), receiverActive);
@@ -91,7 +99,12 @@ public class ChatController {
 
     @GetMapping("/active/{userId}")
     public List<ActiveConversation> getActiveConversations(@PathVariable String userId) {
-        return chatService.getActiveConversations(userId);
+        List<ActiveConversation> list = chatService.getActiveConversations(userId);
+        for (ActiveConversation ac : list) {
+            String ex = chatService.getConversationExchangeId(ac.getConversationId());
+            ac.setExchangeId(ex);
+        }
+        return list;
     }
 
     @PostMapping("/read/{userId}/{conversationId}")
@@ -99,6 +112,7 @@ public class ChatController {
     public void markRead(@PathVariable String userId, @PathVariable String conversationId) {
         chatService.markConversationRead(userId, conversationId);
         ActiveConversation updated = chatService.getActiveConversationFor(userId, conversationId);
+        updated.setExchangeId(chatService.getConversationExchangeId(conversationId));
         template.convertAndSend("/topic/inbox." + userId, updated);
     }
 
